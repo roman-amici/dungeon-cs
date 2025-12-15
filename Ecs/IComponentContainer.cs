@@ -2,5 +2,5 @@ namespace Ecs;
 
 public interface IComponentContainer
 {
-    public void RemoveEntity(ulong entityId);
+    public void RemoveEntity(EntityId entityId);
 }

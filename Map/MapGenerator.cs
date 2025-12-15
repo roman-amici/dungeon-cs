@@ -11,7 +11,7 @@ public class MapGenerator(uint width, uint height)
     public const uint MaxRoomSize = 50;
     public const uint MinRoomSize = 5;
 
-    private void Fill(DungeonMap<Tile> map, Tile tile, MapRect rect)
+    private void Fill(DungeonMap<MapTile> map, MapTile tile, MapRect rect)
     {
         for (var x = rect.X; x < rect.X + rect.Width; x++)
         {
@@ -22,7 +22,7 @@ public class MapGenerator(uint width, uint height)
         }
     }
 
-    private void FillX(DungeonMap<Tile> map, Tile tile, MapCoord start, MapCoord end)
+    private void FillX(DungeonMap<MapTile> map, MapTile tile, MapCoord start, MapCoord end)
     {
         var y = start.Y;
 
@@ -40,7 +40,7 @@ public class MapGenerator(uint width, uint height)
             }
     }
 
-    private void FillY(DungeonMap<Tile> map, Tile tile, MapCoord start, MapCoord end)
+    private void FillY(DungeonMap<MapTile> map, MapTile tile, MapCoord start, MapCoord end)
     {
         var x = start.X;
 
@@ -58,9 +58,9 @@ public class MapGenerator(uint width, uint height)
         }
     }
 
-    public DungeonMap<Tile> Generate(Random random)
+    public DungeonMap<MapTile> Generate(Random random)
     {
-        var map = new DungeonMap<Tile>(width, height);
+        var map = new DungeonMap<MapTile>(width, height);
 
         var rooms = new List<MapRect>();
 
@@ -87,7 +87,7 @@ public class MapGenerator(uint width, uint height)
 
         foreach (var room in rooms)
         {
-            Fill(map, Tile.Floor, room);
+            Fill(map, MapTile.Floor, room);
         }
 
         for (var i = 0; i < rooms.Count; i++)
@@ -97,8 +97,8 @@ public class MapGenerator(uint width, uint height)
             {
                 var room2 = rooms[j];
                 var elbow = new MapCoord(room2.Center.X, room1.Y);
-                FillX(map, Tile.Floor, room1.Center, elbow);
-                FillY(map, Tile.Floor, elbow, room2.Center);
+                FillX(map, MapTile.Floor, room1.Center, elbow);
+                FillY(map, MapTile.Floor, elbow, room2.Center);
             }
         }
 

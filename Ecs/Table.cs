@@ -11,6 +11,14 @@ public class Table<T> : List<Component<T>>, IComponentContainer where T : struct
             throw new InvalidOperationException($"Entity with id {value.EntityId} already exists");
         }
 
+        for (var i = 0; i < Count; i++)
+        {
+            if (value.EntityId.Id > this[i].EntityId.Id)
+            {
+                Insert(i, value);
+            }
+        }
+
         base.Add(value);
     }
 
@@ -32,7 +40,7 @@ public class Table<T> : List<Component<T>>, IComponentContainer where T : struct
         }
     }
 
-    public void RemoveEntity(ulong entityId)
+    public void RemoveEntity(EntityId entityId)
     {
         var index = -1;
         for (var i = 0; i < Count; i++)

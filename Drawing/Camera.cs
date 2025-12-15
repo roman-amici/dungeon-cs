@@ -46,4 +46,12 @@ public class Camera(ViewPort viewPort, MapCoord topLeft, uint tileSize)
         (tileTopLeft.X + TileSize > 0 && tileTopLeft.Y > 0) ||
         (tileTopLeft.X + TileSize > 0 && tileTopLeft.Y + TileSize > 0);
     }
+
+    public void SetCenter(MapCoord center)
+    {
+        var x = center.X - (ViewPort.WidthPixels / TileSize / 2);
+        var y = center.Y - (ViewPort.HeightPixels / TileSize / 2);
+
+        TopLeft = new (x,y);
+    }
 }

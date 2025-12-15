@@ -4,9 +4,9 @@ using Map;
 namespace Drawing;
 
 public class DrawMapSystem(
-    DungeonMap<Tile> map,
+    DungeonMap<MapTile> map,
     Camera camera,
-    TileAtlas atlas, 
+    TileAtlas<MapTile> atlas, 
     Screen screen) : GameSystem
 {
     public override void Execute()

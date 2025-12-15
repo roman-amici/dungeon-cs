@@ -4,13 +4,13 @@ namespace Ecs;
 
 public struct Component<T> where T : struct
 {
-    public Component(ulong entityId, T value)
+    public Component(EntityId entityId, T value)
     {
         EntityId = entityId;
         Value = value;
     }
 
-    public readonly ulong EntityId;
+    public readonly EntityId EntityId;
     public readonly T Value;
 
     public override bool Equals([NotNullWhen(true)] object? obj)

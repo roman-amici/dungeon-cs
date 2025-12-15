@@ -1,6 +1,6 @@
 namespace Map;
 
-public enum Tile
+public enum MapTile
 {
     Wall,
     Floor

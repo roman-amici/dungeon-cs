@@ -1,4 +1,6 @@
 ﻿using Drawing;
+using Ecs;
+using Game;
 using Map;
 using SDL2;
 
@@ -32,19 +34,34 @@ if (renderer == IntPtr.Zero)
 }
 
 var world = new World();
-var map = new DungeonMap<Tile>(256, 256);
+var mapGenerator = new MapGenerator(256, 256);
+var map = mapGenerator.Generate(new Random());
 var viewPort = new ViewPort(640, 480);
 var camera = new Camera(viewPort, map.Center, 32);
 
 var sheet = SdlAbstractions.Texture.LoadTexture(renderer, "dungeonfont.png");
-var tileAtlas = new TileAtlas(sheet, 32);
-tileAtlas.AddGridTile(Tile.Wall, 32, 3, 2);
-tileAtlas.AddGridTile(Tile.Floor, 32, 14, 2);
+var mapTileAtlas = new TileAtlas<MapTile>(sheet, 32);
+
+mapTileAtlas.AddGridTile(MapTile.Wall, 32, 3, 2);
+mapTileAtlas.AddGridTile(MapTile.Floor, 32, 14, 2);
+
+var spriteAtlas = new TileAtlas<SpriteTile>(sheet, 32);
+spriteAtlas.AddGridTile(SpriteTile.Knight, 32, 0, 4);
+
 var screen = new Screen(renderer);
 
-world.Systems.Add(new DrawMapSystem(map, camera, tileAtlas, screen));
+var sprites = new Table<SpriteKey<SpriteTile>>();
+var positions = new Table<Position>();
+var player = new Singleton<Player>();
+world.AddComponent(sprites);
+world.AddComponent(positions);
+world.AddComponent(player);
 
+world.SpawnEntity(new PlayerSpawner(map, sprites,positions, player));
 
+world.Systems.Add(new CenterCameraOnPlayerSystem(camera, new SingletonJoin<Player, Position>(player,positions)));
+world.Systems.Add(new DrawMapSystem(map, camera, mapTileAtlas, screen));
+world.Systems.Add(new DrawSpriteSystem(map, camera, spriteAtlas, screen, new TableJoin<SpriteKey<SpriteTile>, Position>(sprites,positions)));
 
 bool PollEvents()
 {

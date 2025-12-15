@@ -1,12 +1,14 @@
+using System.ComponentModel;
 using Ecs;
 
 public class World()
 {
     private ulong NextEntityId { get; set; } = 1;
 
-    public HashSet<ulong> Entities { get; } = [];
-    public List<IComponentContainer> Containers { get; } = [];
+    private ulong NextComponentId {get; set;} = 1;
 
+    public HashSet<EntityId> Entities { get; } = [];
+    public Dictionary<ComponentId, IComponentContainer> Containers { get; } = [];
     public List<GameSystem> Systems { get; } = [];
 
     public void Execute()
@@ -17,24 +19,34 @@ public class World()
         }
     }
 
-    public void RemoveEntity(ulong entityId)
+    public void RemoveEntity(EntityId entityId)
     {
         Entities.Remove(entityId);
-        foreach (var container in Containers)
+        foreach (var container in Containers.Values)
         {
             container.RemoveEntity(entityId);
         }
     }
 
-    public ulong SpawnEntity(Spawner spawner)
+    public EntityId SpawnEntity(Spawner spawner)
     {
-        var entityId = NextEntityId++;
+        var entityId = new EntityId(NextEntityId++);
 
         Entities.Add(entityId);
 
         spawner.Spawn(entityId);
 
         return entityId;
+    }
+
+    public ComponentId AddComponent(IComponentContainer component)
+    {
+        var next = NextComponentId++;
+        var id = new ComponentId(next);
+
+        Containers.Add(id, component);
+
+        return id;
     }
 
 }
