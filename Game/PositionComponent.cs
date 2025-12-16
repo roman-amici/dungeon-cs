@@ -2,7 +2,7 @@ using Map;
 
 namespace Game;
 
-public struct Position
+public struct Position(MapCoord MapPosition)
 {
-    public required MapCoord MapPosition { get; set; }
+    public MapCoord MapPosition { get; set; } = MapPosition;
 }

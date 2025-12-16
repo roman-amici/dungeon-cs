@@ -11,30 +11,39 @@ where U : struct
 {
     public TableJoin(Table<T> t1, Table<U> t2)
     {
-        this.t1 = t1;
-        this.t2 = t2;
+        T1 = t1;
+        T2 = t2;
     }
 
-    private readonly Table<T> t1;
-    private readonly Table<U> t2;
+    public Table<T> T1 {get;}
+    public Table<U> T2 {get;}
 
     public IEnumerator<(Component<T>, Component<U>)> GetEnumerator()
     {
-        var lastJ = 0;
-        for (var i = 0; i < t1.Count; i++)
+        foreach (var (i,j) in GetIndices())
         {
-            for (var j = lastJ; j < t2.Count; j++)
+            yield return (T1[i],T2[j]);
+        }
+    }
+
+    public IEnumerable<(int,int)> GetIndices()
+    {
+        // Optimization since we know that tables are in sorted order
+        var lastJ = 0;
+        for (var i = 0; i < T1.Count; i++)
+        {
+            for (var j = lastJ; j < T2.Count; j++)
             {
-                if (t1[i].EntityId == t2[i].EntityId)
+                if (T1[i].EntityId == T2[i].EntityId)
                 {
-                    yield return (t1[i], t2[i]);
+                    yield return (i,j);
 
                     lastJ = j+1;
                     break;
                 }
             }
 
-            if (lastJ >= t2.Count)
+            if (lastJ >= T2.Count)
             {
                 yield break;
             }
@@ -44,5 +53,14 @@ where U : struct
     IEnumerator IEnumerable.GetEnumerator()
     {
         return GetEnumerator();
+    }
+
+    public (T,U) this[int indexT, int indexU]
+    {
+        get
+        {
+            return (T1[indexT].Value,T2[indexU].Value);
+        }
+
     }
 }

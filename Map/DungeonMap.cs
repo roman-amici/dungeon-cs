@@ -14,17 +14,22 @@ public class DungeonMap<T> where T : struct
 
     public T? SafeGet(uint x, uint y)
     {
-        if (x > Map.GetLength(0) || x < 0)
+        if (x >= Map.GetLength(0) || x < 0)
         {
             return null;
         }
 
-        if (y > Map.GetLength(1) || y < 0)
+        if (y >= Map.GetLength(1) || y < 0)
         {
             return null;
         }
 
         return Map[x, y];
+    }
+
+    public T? SafeGet(MapCoord coord)
+    {
+        return SafeGet(coord.X,coord.Y);
     }
 
     public T? Up(uint x, uint y)

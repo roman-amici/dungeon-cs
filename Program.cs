@@ -1,8 +1,10 @@
 ﻿using Drawing;
 using Ecs;
 using Game;
+using Input;
 using Map;
 using SDL2;
+using SdlAbstractions;
 
 if (SDL.SDL_Init(SDL.SDL_INIT_VIDEO) < 0)
 {
@@ -59,18 +61,29 @@ world.AddComponent(player);
 
 world.SpawnEntity(new PlayerSpawner(map, sprites,positions, player));
 
+var inputParser = new InputParser();
+
+var moveQueue = new Queue<WantsToMoveMessage>();
+world.Systems.Add(new PlayerInputSystem(inputParser, new SingletonJoin<Player, Position>(player,positions), moveQueue));
+world.Systems.Add(new MovementSystem(map, moveQueue, positions));
+
 world.Systems.Add(new CenterCameraOnPlayerSystem(camera, new SingletonJoin<Player, Position>(player,positions)));
 world.Systems.Add(new DrawMapSystem(map, camera, mapTileAtlas, screen));
 world.Systems.Add(new DrawSpriteSystem(map, camera, spriteAtlas, screen, new TableJoin<SpriteKey<SpriteTile>, Position>(sprites,positions)));
 
+
 bool PollEvents()
 {
+    inputParser.StartNewFrame();
     while (SDL.SDL_PollEvent(out var e) == 1)
     {
         switch (e.type)
         {
             case SDL.SDL_EventType.SDL_QUIT:
                 return false;
+            default:
+                inputParser.HandleEvent(e);
+                break;
         }
     }
 

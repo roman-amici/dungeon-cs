@@ -24,4 +24,32 @@ public struct MapCoord(uint x, uint y)
     {
         return Math.Sqrt(Math.Pow(X - other.X, 2) + Math.Pow(Y - other.Y, 2));
     }
+
+    public MapCoord? SafeUp()
+    {
+        if (Y == 0)
+        {
+            return null;
+        }
+        return new(X,Y-1);
+    }
+
+    public MapCoord Down()
+    {
+        return new(X,Y+1);
+    }
+
+    public MapCoord? SafeLeft()
+    {
+        if (X == 0)
+        {
+            return null;
+        }
+        return new(X-1,Y);
+    }
+
+    public MapCoord Right()
+    {
+        return new(X+1,Y);
+    }
 }

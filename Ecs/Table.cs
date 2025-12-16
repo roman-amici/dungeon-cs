@@ -22,22 +22,25 @@ public class Table<T> : List<Component<T>>, IComponentContainer where T : struct
         base.Add(value);
     }
 
+    public void Update(int i, T value)
+    {
+        var component = base[i];
+        base[i] = new Component<T>(component.EntityId, value);
+    }
+
+    public void Update(EntityId id, T Value)
+    {
+        var i = FindIndex(x => x.EntityId == id);
+        if (i >= 0)
+        {
+            Update(i,Value);
+        }
+    }
+
     public new Component<T> this[int i]
     {
         get => base[i];
         set => throw new InvalidOperationException("Use Update instead");
-    }
-
-    public void Update(Func<T, T?> updateFunction)
-    {
-        for (var i = 0; i < Count; i++)
-        {
-            var result = updateFunction(this[i].Value);
-            if (result != null)
-            {
-                base[i] = new Component<T>(this[i].EntityId, result.Value);
-            }
-        }
     }
 
     public void RemoveEntity(EntityId entityId)
