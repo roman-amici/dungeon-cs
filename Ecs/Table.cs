@@ -1,3 +1,6 @@
+using System.ComponentModel;
+using System.Security.Cryptography.X509Certificates;
+
 namespace Ecs;
 
 // Base table not optimized for insertions or removals
@@ -49,6 +52,18 @@ public class Table<T> : List<Component<T>>, IComponentContainer where T : struct
         set => throw new InvalidOperationException("Use Update instead");
     }
 
+    public T? GetEntity(EntityId entityId)
+    {
+        var index = FindIndex(x => x.EntityId == entityId);
+
+        if (index <= 0)
+        {
+            return null;
+        }
+
+        return base[index].Value;
+    }
+
     public void RemoveEntity(EntityId entityId)
     {
         var index = -1;
@@ -61,9 +76,22 @@ public class Table<T> : List<Component<T>>, IComponentContainer where T : struct
             }
         }
 
-        if (index > 0)
+        if (index >= 0)
         {
             RemoveAt(index);
         }
+    }
+
+    public Component<T>? FirstWhere(Func<Component<T>, bool> predicate)
+    {
+        foreach(var component in this)
+        {
+            if (predicate(component))
+            {
+                return component;
+            }
+        }
+
+        return null;
     }
 }

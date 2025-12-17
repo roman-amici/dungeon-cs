@@ -57,33 +57,82 @@ spriteAtlas.AddGridTile(SpriteTile.Ogre, 32, 5, 4);
 
 var screen = new Screen(renderer);
 
+var turn = new Turn()
+{
+    CurrentTurn = GameTurn.AwaitingInput
+};
+
+
 var sprites = new Table<SpriteKey<SpriteTile>>();
 var positions = new Table<Position>();
 var player = new Singleton<Player>();
 var enemies = new Table<Enemy>();
 var toolTips = new Table<ToolTip>();
 var healths = new Table<Health>();
+var damages = new Table<Damage>();
+var randomMovers = new Table<MovingRandomly>();
 world.AddComponent(sprites);
 world.AddComponent(positions);
 world.AddComponent(player);
 world.AddComponent(enemies);
 world.AddComponent(toolTips);
 world.AddComponent(healths);
+world.AddComponent(damages);
+world.AddComponent(randomMovers);
 
-world.SpawnEntity(new PlayerSpawner(map, sprites,positions, player, healths, toolTips), null);
+world.SpawnEntity(new PlayerSpawner(map, sprites,positions, player, healths, toolTips, damages), null);
 
-var enemySpawner = new EnemySpawner(map, positions, sprites, enemies, toolTips, healths, rng);
+var enemySpawner = new EnemySpawner(map, positions, sprites, enemies, toolTips, healths, damages, randomMovers, rng);
 enemySpawner.SpawnEnemies(world);
 
 var inputParser = new InputParser();
 
 var moveQueue = new Queue<WantsToMoveMessage>();
-world.Systems.Add(new PlayerInputSystem(inputParser, new SingletonJoin<Player, Position>(player,positions), moveQueue));
-world.Systems.Add(new MovementSystem(map, moveQueue, positions));
+var attackQueue = new Queue<WantsToAttackMessage>();
 
-world.Systems.Add(new CenterCameraOnPlayerSystem(camera, new SingletonJoin<Player, Position>(player,positions)));
-world.Systems.Add(new DrawMapSystem(map, camera, mapTileAtlas, screen));
-world.Systems.Add(new DrawSpriteSystem(camera, spriteAtlas, screen, new TableJoin<SpriteKey<SpriteTile>, Position>(sprites,positions)));
+var turnScheduler = new TurnStateScheduler(turn);
+
+var moveRandomly = new MoveRandomlySystem(moveQueue, new TableJoin<MovingRandomly, Position>(randomMovers, positions), rng);
+var playerInput =  new PlayerInputSystem(inputParser, new SingletonJoin<Player, Position>(player,positions), moveQueue, turn);
+var movement = new MovementSystem(map, moveQueue, attackQueue, positions);
+var combat = new CombatSystem(attackQueue, damages, healths);
+var kill = new KillEntitiesSystem(world, healths);
+
+var centerCamera = new CenterCameraOnPlayerSystem(camera, new SingletonJoin<Player, Position>(player,positions));
+var drawMap = new DrawMapSystem(map, camera, mapTileAtlas, screen);
+var drawSprite = new DrawSpriteSystem(camera, spriteAtlas, screen, new TableJoin<SpriteKey<SpriteTile>, Position>(sprites,positions));
+var endTurn = new EndTurnSystem(turn);
+
+turnScheduler.AwaitingInput.AddRange([
+   playerInput,
+   endTurn,
+   centerCamera,
+   drawMap,
+   drawSprite,
+]);
+
+turnScheduler.PlayerTurn.AddRange([
+    movement,
+    combat,
+    kill,
+    endTurn,
+    centerCamera,
+    drawMap,
+    drawSprite,
+]);
+
+turnScheduler.EnemyTurn.AddRange([
+    moveRandomly,
+    movement,
+    combat,
+    kill,
+    endTurn,
+    centerCamera,
+    drawMap,
+    drawSprite,
+]);
+
+world.Systems.Add(turnScheduler);
 
 bool PollEvents()
 {

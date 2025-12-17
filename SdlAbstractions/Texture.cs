@@ -6,7 +6,7 @@ public class Texture(nint texturePointer) : IDisposable
 {
     public nint TexturePointer { get; } = texturePointer;
 
-    public static unsafe Texture LoadTexture(nint renderer, string path)
+    public static Texture LoadTexture(nint renderer, string path)
     {
         var texture = SDL_image.IMG_LoadTexture(renderer, path);
 

@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using Ecs;
 using Map;
 
@@ -6,26 +7,34 @@ namespace Game;
 public class MovementSystem(
     DungeonMap<MapTile> map,
     Queue<WantsToMoveMessage> moves,
+    Queue<WantsToAttackMessage> attacks,
     Table<Position> positions) : GameSystem
 {
     public override void Execute()
     {
-        foreach(var move in moves)
+        while(moves.TryDequeue(out var move))
         {
             var tile = map.SafeGet(move.NewPosition.MapPosition);
             if (tile == null)
             {
                 continue;
             }
+
             if (tile != MapTile.Floor)
             {
                 continue;
             }
 
-            positions.Update(move.Entity, move.NewPosition);
+            var occupied = positions.FirstWhere(x => x.Value.MapPosition == move.NewPosition.MapPosition);
+            if (occupied == null)
+            {
+                positions.Update(move.Entity, move.NewPosition);
+            }
+            else
+            {
+                attacks.Enqueue(new WantsToAttackMessage(move.Entity, occupied.Value.EntityId));
+            }
         }
-        
-        moves.Clear();
     }
 }
 

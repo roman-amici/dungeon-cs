@@ -10,7 +10,8 @@ public class PlayerSpawner(
     Table<Position> positions,
     Singleton<Player> player,
     Table<Health> healths,
-    Table<ToolTip> toolTip
+    Table<ToolTip> toolTip,
+    Table<Damage> damages
 ) : Spawner
 {
     public override void Spawn(EntityId entityId, object? _)
@@ -46,6 +47,7 @@ public class PlayerSpawner(
 
         healths.Add(entityId, new Health(20));
         toolTip.Add(entityId, new ToolTip("Player"));
+        damages.Add(entityId, new Damage(1.0));
 
     }
 }

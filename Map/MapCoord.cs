@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Map;
 
 public struct MapCoord(uint x, uint y)
@@ -51,5 +53,30 @@ public struct MapCoord(uint x, uint y)
     public MapCoord Right()
     {
         return new(X+1,Y);
+    }
+
+    public static bool operator ==(MapCoord left, MapCoord right)
+    {
+        return left.Equals(right);
+    }
+
+    public static bool operator !=(MapCoord left, MapCoord right)
+    {
+        return !(left == right);
+    }
+
+    public override bool Equals([NotNullWhen(true)] object? obj)
+    {
+        if (obj is MapCoord coord)
+        {
+            return coord.X == X && coord.Y == Y;
+        }
+
+        return false;
+    }
+
+    public override int GetHashCode()
+    {
+        return (X,Y).GetHashCode();
     }
 }

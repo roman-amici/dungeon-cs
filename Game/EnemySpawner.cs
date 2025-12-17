@@ -11,6 +11,8 @@ public class EnemySpawner(
     Table<Enemy> enemies,
     Table<ToolTip> tooltips,
     Table<Health> healths,
+    Table<Damage> damages,
+    Table<MovingRandomly> randomMovers,
     Random rng) : Spawner
 {
     public void SpawnEnemies(World world)
@@ -49,6 +51,8 @@ public class EnemySpawner(
         sprites.Add(entityId, new SpriteKey<SpriteTile>(tile));
         tooltips.Add(entityId, new ToolTip(GetName(tile)));
         healths.Add(entityId, new Health(GetHealth(tile)));
+        randomMovers.Add(entityId, new MovingRandomly());
+        damages.Add(entityId, new Damage(GetDamage(tile)));
     }
 
     public string GetName(SpriteTile tile)
@@ -65,6 +69,19 @@ public class EnemySpawner(
             SpriteTile.Orc => 2,
             SpriteTile.Entin => 3,
             SpriteTile.Ogre => 4,
+            _ => throw new IndexOutOfRangeException(),
+        };
+    }
+
+    public double GetDamage(SpriteTile tile)
+    {
+        return tile switch
+        {
+            SpriteTile.Knight => 1.0,
+            SpriteTile.Goblin => 1.0,
+            SpriteTile.Orc => 1.5,
+            SpriteTile.Entin => 2,
+            SpriteTile.Ogre => 2.5,
             _ => throw new IndexOutOfRangeException(),
         };
     }
