@@ -16,10 +16,16 @@ public class Table<T> : List<Component<T>>, IComponentContainer where T : struct
             if (value.EntityId.Id > this[i].EntityId.Id)
             {
                 Insert(i, value);
+                return;
             }
         }
 
         base.Add(value);
+    }
+
+    public void Add (EntityId entityId, T value)
+    {
+        Add(new Component<T>(entityId, value));
     }
 
     public void Update(int i, T value)

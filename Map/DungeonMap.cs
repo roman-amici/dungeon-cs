@@ -4,6 +4,8 @@ public class DungeonMap<T> where T : struct
 {
     public T[,] Map { get; }
 
+    public List<MapRect> Rooms {get;} = new();
+
     public uint Width => (uint)Map.GetLength(0);
     public uint Height => (uint)Map.GetLength(1);
 

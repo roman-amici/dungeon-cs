@@ -2,5 +2,5 @@ namespace Ecs;
 
 public abstract class Spawner
 {
-    public abstract void Spawn(EntityId entityId);
+    public abstract void Spawn(EntityId entityId, object? context = null);
 }

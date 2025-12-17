@@ -52,7 +52,7 @@ public class MapGenerator(uint width, uint height)
             endY = start.Y;
         }
 
-        for (var y = start.Y; y <= end.Y; y++)
+        for (var y = startY; y <= endY; y++)
         {
             map.Map[x, y] = tile;
         }
@@ -62,9 +62,7 @@ public class MapGenerator(uint width, uint height)
     {
         var map = new DungeonMap<MapTile>(width, height);
 
-        var rooms = new List<MapRect>();
-
-        while (rooms.Count < NumRooms)
+        while (map.Rooms.Count < NumRooms)
         {
             var room = new MapRect(
                 (uint)random.Next(0, (int)width),
@@ -77,25 +75,25 @@ public class MapGenerator(uint width, uint height)
                 continue;
             }
 
-            if (rooms.Any(x => x.Intersects(room)))
+            if (map.Rooms.Any(x => x.Intersects(room)))
             {
                 continue;
             }
 
-            rooms.Add(room);
+            map.Rooms.Add(room);
         }
 
-        foreach (var room in rooms)
+        foreach (var room in map.Rooms)
         {
             Fill(map, MapTile.Floor, room);
         }
 
-        for (var i = 0; i < rooms.Count; i++)
+        for (var i = 0; i < map.Rooms.Count; i++)
         {
-            var room1 = rooms[i];
-            for (var j = i; j < rooms.Count; j++)
+            var room1 = map.Rooms[i];
+            for (var j = i; j < map.Rooms.Count; j++)
             {
-                var room2 = rooms[j];
+                var room2 = map.Rooms[j];
                 var elbow = new MapCoord(room2.Center.X, room1.Y);
                 FillX(map, MapTile.Floor, room1.Center, elbow);
                 FillY(map, MapTile.Floor, elbow, room2.Center);

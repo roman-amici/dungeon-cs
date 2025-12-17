@@ -28,13 +28,13 @@ public class World()
         }
     }
 
-    public EntityId SpawnEntity(Spawner spawner)
+    public EntityId SpawnEntity(Spawner spawner, object? context)
     {
         var entityId = new EntityId(NextEntityId++);
 
         Entities.Add(entityId);
 
-        spawner.Spawn(entityId);
+        spawner.Spawn(entityId, context);
 
         return entityId;
     }

@@ -6,11 +6,15 @@ namespace Drawing;
 
 public enum SpriteTile
 {
-    Knight
+    Knight,
+    Goblin,
+    Orc,
+    Entin,
+    Ogre
+
 }
 
 public class DrawSpriteSystem(
-    DungeonMap<MapTile> map,
     Camera camera,
     TileAtlas<SpriteTile> spriteAtlas,
     Screen screen,

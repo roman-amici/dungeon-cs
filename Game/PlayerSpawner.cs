@@ -8,17 +8,16 @@ public class PlayerSpawner(
     DungeonMap<MapTile> map,
     Table<SpriteKey<SpriteTile>> sprites,
     Table<Position> positions,
-    Singleton<Player> player
+    Singleton<Player> player,
+    Table<Health> healths,
+    Table<ToolTip> toolTip
 ) : Spawner
 {
-    public override void Spawn(EntityId entityId)
+    public override void Spawn(EntityId entityId, object? _)
     {
         player.Spawn(entityId, new());
 
-        var tile = new SpriteKey<SpriteTile>()
-        {
-            Tile = SpriteTile.Knight
-        };
+        var tile = new SpriteKey<SpriteTile>(SpriteTile.Knight);
 
         sprites.Add(new Component<SpriteKey<SpriteTile>>(entityId, tile));
 
@@ -44,5 +43,9 @@ public class PlayerSpawner(
         {
             MapPosition = position.Value
         }));
+
+        healths.Add(entityId, new Health(20));
+        toolTip.Add(entityId, new ToolTip("Player"));
+
     }
 }
