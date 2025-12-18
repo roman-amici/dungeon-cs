@@ -21,7 +21,8 @@ var window = SDL.SDL_CreateWindow(
 
 if (window == IntPtr.Zero)
 {
-    throw new Exception("Failed to create window");
+    var err = SDL.SDL_GetError();
+    throw new Exception($"Failed to create window: {err}");
 }
 
 var renderer = SDL.SDL_CreateRenderer(
@@ -32,8 +33,17 @@ var renderer = SDL.SDL_CreateRenderer(
 
 if (renderer == IntPtr.Zero)
 {
-    throw new Exception("Failed to initialize renderer");
+    var err = SDL.SDL_GetError();
+    throw new Exception($"Failed to initialize renderer: {err}");
 }
+
+if (SDL_ttf.TTF_Init() < 0)
+{
+    var err = SDL.SDL_GetError();
+    throw new Exception($"Failed to initialize ttf: {err}");
+}
+
+
 
 var world = new World();
 var mapGenerator = new MapGenerator(256, 256);
@@ -56,6 +66,9 @@ spriteAtlas.AddGridTile(SpriteTile.Entin, 32, 15, 4);
 spriteAtlas.AddGridTile(SpriteTile.Ogre, 32, 5, 4);
 
 var screen = new Screen(renderer);
+
+var font = Font.LoadFont("FreeMono.ttf");
+var textRenderer = new TextRenderer(screen, font);
 
 var turn = new Turn()
 {
@@ -91,9 +104,13 @@ var moveQueue = new Queue<WantsToMoveMessage>();
 var attackQueue = new Queue<WantsToAttackMessage>();
 
 var turnScheduler = new TurnStateScheduler(turn);
+var mouseLocation = new MouseLocation();
+var playerActionQueue = new Queue<PlayerAction>();
+
+var playerActions = new PlayerActionSystem(playerActionQueue, moveQueue, new SingletonJoin<Player, Health>(player, healths));
 
 var moveRandomly = new MoveRandomlySystem(moveQueue, new TableJoin<MovingRandomly, Position>(randomMovers, positions), rng);
-var playerInput =  new PlayerInputSystem(inputParser, new SingletonJoin<Player, Position>(player,positions), moveQueue, turn);
+var playerInput =  new PlayerInputSystem(inputParser, new SingletonJoin<Player, Position>(player,positions), mouseLocation, playerActionQueue, turn);
 var movement = new MovementSystem(map, moveQueue, attackQueue, positions);
 var combat = new CombatSystem(attackQueue, damages, healths);
 var kill = new KillEntitiesSystem(world, healths);
@@ -101,6 +118,9 @@ var kill = new KillEntitiesSystem(world, healths);
 var centerCamera = new CenterCameraOnPlayerSystem(camera, new SingletonJoin<Player, Position>(player,positions));
 var drawMap = new DrawMapSystem(map, camera, mapTileAtlas, screen);
 var drawSprite = new DrawSpriteSystem(camera, spriteAtlas, screen, new TableJoin<SpriteKey<SpriteTile>, Position>(sprites,positions));
+var drawTooltips = new DrawTooltipSystem(camera, textRenderer, mouseLocation, new TableJoin<ToolTip, Position>(toolTips,positions));
+var drawHealthBar = new DrawHealthBarSystem(camera,screen, new TableJoin<Health, Position>(healths,positions));
+
 var endTurn = new EndTurnSystem(turn);
 
 turnScheduler.AwaitingInput.AddRange([
@@ -109,9 +129,12 @@ turnScheduler.AwaitingInput.AddRange([
    centerCamera,
    drawMap,
    drawSprite,
+   drawTooltips,
+   drawHealthBar,
 ]);
 
 turnScheduler.PlayerTurn.AddRange([
+    playerActions,
     movement,
     combat,
     kill,
@@ -119,6 +142,8 @@ turnScheduler.PlayerTurn.AddRange([
     centerCamera,
     drawMap,
     drawSprite,
+    drawTooltips,
+    drawHealthBar,
 ]);
 
 turnScheduler.EnemyTurn.AddRange([
@@ -130,6 +155,8 @@ turnScheduler.EnemyTurn.AddRange([
     centerCamera,
     drawMap,
     drawSprite,
+   drawTooltips,
+   drawHealthBar,
 ]);
 
 world.Systems.Add(turnScheduler);

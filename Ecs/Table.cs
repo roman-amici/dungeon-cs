@@ -26,7 +26,7 @@ public class Table<T> : List<Component<T>>, IComponentContainer where T : struct
         base.Add(value);
     }
 
-    public void Add (EntityId entityId, T value)
+    public void Add(EntityId entityId, T value)
     {
         Add(new Component<T>(entityId, value));
     }

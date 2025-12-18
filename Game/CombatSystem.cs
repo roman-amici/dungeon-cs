@@ -9,7 +9,7 @@ public class CombatSystem(
 {
     public override void Execute()
     {
-        foreach(var attack in attackMessages)
+        while(attackMessages.TryDequeue(out var attack))
         {
 
             var health = healths.GetEntity(attack.Attacked);

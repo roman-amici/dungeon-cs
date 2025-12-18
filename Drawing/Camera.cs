@@ -54,4 +54,12 @@ public class Camera(ViewPort viewPort, MapCoord topLeft, uint tileSize)
 
         TopLeft = new (x,y);
     }
+
+    internal MapCoord ScreenSpaceToMapCoord(Point2D screenSpace)
+    {
+        var xMap = TopLeft.X + (uint)Math.Floor(screenSpace.X / TileSize);
+        var yMap = TopLeft.Y + (uint)Math.Floor(screenSpace.Y / TileSize);
+
+        return new MapCoord(xMap,yMap);
+    }
 }

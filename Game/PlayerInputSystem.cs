@@ -1,4 +1,3 @@
-using System.Dynamic;
 using Ecs;
 using Input;
 using Map;
@@ -8,13 +7,20 @@ namespace Game;
 public class PlayerInputSystem(
     InputParser inputParser,
     SingletonJoin<Player,Position> playerPosition,
-    Queue<WantsToMoveMessage> moves,
+    MouseLocation mouseLocation,
+    Queue<PlayerAction> playerActions,
     Turn turn
 ) : GameSystem
 {
     public override void Execute()
     {
         turn.EndTurn = false;
+
+        foreach (var mouseMoveEvent in inputParser.MouseMoveEvents)
+        {
+            mouseLocation.Point = mouseMoveEvent.Position;
+        }
+
         if (!playerPosition.Any())
         {
             return;
@@ -30,8 +36,8 @@ public class PlayerInputSystem(
 
             if (keyEvent.Key == Key.Space)
             {
-                turn.EndTurn = true;
-                return;
+                playerActions.Enqueue(new PlayerWait());
+                break;
             }
 
             MapCoord? newPosition = null;;
@@ -53,10 +59,19 @@ public class PlayerInputSystem(
 
             if (newPosition != null)
             {
-                moves.Enqueue(new WantsToMoveMessage(position.EntityId, new(newPosition.Value)));
-                turn.EndTurn = true;
-                return;
+                playerActions.Enqueue(new PlayerMove(newPosition.Value));
+                break;
             }
         }
+
+        if (playerActions.Any())
+        {
+            turn.EndTurn = true;
+        }
     }
+}
+
+public class MouseLocation
+{
+    public Point2D? Point {get; set;} = null;
 }

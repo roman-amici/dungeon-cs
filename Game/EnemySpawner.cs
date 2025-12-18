@@ -46,6 +46,7 @@ public class EnemySpawner(
           11 => SpriteTile.Ogre,
           _ => throw new IndexOutOfRangeException()
         };
+        tile = SpriteTile.Entin;
 
         positions.Add(entityId, new (spawnerContext.SpawnPosition));
         sprites.Add(entityId, new SpriteKey<SpriteTile>(tile));
