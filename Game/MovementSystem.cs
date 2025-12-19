@@ -8,7 +8,9 @@ public class MovementSystem(
     DungeonMap<MapTile> map,
     Queue<WantsToMoveMessage> moves,
     Queue<WantsToAttackMessage> attacks,
-    Table<Position> positions) : GameSystem
+    Table<Position> positions,
+    TableJoin<Collision,Position> colliders,
+    Table<Enemy> enemies) : GameSystem
 {
     public override void Execute()
     {
@@ -25,14 +27,17 @@ public class MovementSystem(
                 continue;
             }
 
-            var occupied = positions.FirstWhere(x => x.Value.MapPosition == move.NewPosition.MapPosition);
+            var occupied = colliders.FirstWhere((t) => t.Item2.MapPosition == move.NewPosition.MapPosition);
             if (occupied == null)
             {
                 positions.Update(move.Entity, move.NewPosition);
             }
             else
             {
-                attacks.Enqueue(new WantsToAttackMessage(move.Entity, occupied.Value.EntityId));
+                if (enemies.FirstWhere(x => x.EntityId == occupied.Value.Item2.EntityId) != null)
+                {
+                    attacks.Enqueue(new WantsToAttackMessage(move.Entity, occupied.Value.Item2.EntityId));
+                }
             }
         }
     }

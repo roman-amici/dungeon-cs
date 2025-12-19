@@ -1,6 +1,7 @@
 ﻿using Drawing;
 using Ecs;
 using Game;
+using GameDebug;
 using Input;
 using Map;
 using SDL2;
@@ -64,6 +65,10 @@ spriteAtlas.AddGridTile(SpriteTile.Goblin, 32, 7, 6);
 spriteAtlas.AddGridTile(SpriteTile.Orc, 32, 15, 6);
 spriteAtlas.AddGridTile(SpriteTile.Entin, 32, 15, 4);
 spriteAtlas.AddGridTile(SpriteTile.Ogre, 32, 5, 4);
+spriteAtlas.AddGridTile(SpriteTile.Amulet, 32, 12, 7);
+spriteAtlas.AddGridTile(SpriteTile.Sword, 32, 3, 5);
+spriteAtlas.AddGridTile(SpriteTile.Potion, 32, 1, 2);
+
 
 var screen = new Screen(renderer);
 
@@ -75,6 +80,7 @@ var turn = new Turn()
     CurrentTurn = GameTurn.AwaitingInput
 };
 
+var gameState = new GameStateResource(GameState.GameRun);
 
 var sprites = new Table<SpriteKey<SpriteTile>>();
 var positions = new Table<Position>();
@@ -84,6 +90,8 @@ var toolTips = new Table<ToolTip>();
 var healths = new Table<Health>();
 var damages = new Table<Damage>();
 var randomMovers = new Table<MovingRandomly>();
+var pickupItems = new Table<PickupItem>();
+var colliders = new Table<Collision>();
 world.AddComponent(sprites);
 world.AddComponent(positions);
 world.AddComponent(player);
@@ -92,11 +100,18 @@ world.AddComponent(toolTips);
 world.AddComponent(healths);
 world.AddComponent(damages);
 world.AddComponent(randomMovers);
+world.AddComponent(pickupItems);
+world.AddComponent(colliders);
 
-world.SpawnEntity(new PlayerSpawner(map, sprites,positions, player, healths, toolTips, damages), null);
 
-var enemySpawner = new EnemySpawner(map, positions, sprites, enemies, toolTips, healths, damages, randomMovers, rng);
+world.SpawnEntity(new PlayerSpawner(map, sprites,positions, player, healths, toolTips, damages, colliders), null);
+
+var enemySpawner = new EnemySpawner(map, positions, sprites, enemies, toolTips, healths, damages, randomMovers, colliders, rng);
 enemySpawner.SpawnEnemies(world);
+
+var distanceMap = new DistanceMap(map.Width,map.Height);
+var itemSpawner = new ItemSpawner(map, distanceMap, new SingletonJoin<Player, Position>(player,positions), positions, pickupItems, sprites);
+itemSpawner.SpawnItems(world, rng);
 
 var inputParser = new InputParser();
 
@@ -111,15 +126,19 @@ var playerActions = new PlayerActionSystem(playerActionQueue, moveQueue, new Sin
 
 var moveRandomly = new MoveRandomlySystem(moveQueue, new TableJoin<MovingRandomly, Position>(randomMovers, positions), rng);
 var playerInput =  new PlayerInputSystem(inputParser, new SingletonJoin<Player, Position>(player,positions), mouseLocation, playerActionQueue, turn);
-var movement = new MovementSystem(map, moveQueue, attackQueue, positions);
+var movement = new MovementSystem(map, moveQueue, attackQueue, positions, new TableJoin<Collision, Position>(colliders,positions), enemies);
 var combat = new CombatSystem(attackQueue, damages, healths);
-var kill = new KillEntitiesSystem(world, healths);
+var kill = new KillEntitiesSystem(world, healths, player, gameState);
+
+var inventory = new PlayerInventory();
 
 var centerCamera = new CenterCameraOnPlayerSystem(camera, new SingletonJoin<Player, Position>(player,positions));
 var drawMap = new DrawMapSystem(map, camera, mapTileAtlas, screen);
 var drawSprite = new DrawSpriteSystem(camera, spriteAtlas, screen, new TableJoin<SpriteKey<SpriteTile>, Position>(sprites,positions));
 var drawTooltips = new DrawTooltipSystem(camera, textRenderer, mouseLocation, new TableJoin<ToolTip, Position>(toolTips,positions));
 var drawHealthBar = new DrawHealthBarSystem(camera,screen, new TableJoin<Health, Position>(healths,positions));
+var playerPickupItem = new PickupItemSystem(new SingletonJoin<Player, Position>(player,positions), new TableJoin<PickupItem, Position>(pickupItems,positions), inventory, gameState);
+var debugDraw = new DistanceDisplaySystem(camera, textRenderer, distanceMap);
 
 var endTurn = new EndTurnSystem(turn);
 
@@ -131,11 +150,13 @@ turnScheduler.AwaitingInput.AddRange([
    drawSprite,
    drawTooltips,
    drawHealthBar,
+   //debugDraw,
 ]);
 
 turnScheduler.PlayerTurn.AddRange([
     playerActions,
     movement,
+    playerPickupItem,
     combat,
     kill,
     endTurn,
@@ -159,7 +180,10 @@ turnScheduler.EnemyTurn.AddRange([
    drawHealthBar,
 ]);
 
-world.Systems.Add(turnScheduler);
+var menus = new MenuScheduler(gameState, viewPort, textRenderer, screen);
+var overlays = new OverlaysSystem(turnScheduler, menus, gameState);
+
+world.Systems.Add(overlays);
 
 bool PollEvents()
 {

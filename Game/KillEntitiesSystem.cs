@@ -2,7 +2,7 @@ using Ecs;
 
 namespace Game;
 
-public class KillEntitiesSystem(World world, Table<Health> healths) : GameSystem
+public class KillEntitiesSystem(World world, Table<Health> healths, Singleton<Player> player, GameStateResource state) : GameSystem
 {
     public override void Execute()
     {
@@ -18,6 +18,11 @@ public class KillEntitiesSystem(World world, Table<Health> healths) : GameSystem
         foreach(var entityId in toKill)
         {
             world.RemoveEntity(entityId);
+        }
+
+        if (player.First == null)
+        {
+            state.CurrentState = GameState.PlayerLoose;
         }
     }
 }

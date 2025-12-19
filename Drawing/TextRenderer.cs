@@ -31,6 +31,7 @@ public class TextRenderer(Screen screen, Font font)
         if (!Cache.TryGetValue(draw, out var surface))
         {
             surface = font.CreateTextureFromText(screen.Renderer, draw.Text, draw.FontSize, draw.Color.ToSdl());
+            Cache[draw] = surface;
         }
 
         var left = center.X - (surface.Texture.Width / 2);
@@ -64,6 +65,14 @@ public struct TextDraw
         Text = text;
         FontSize = fontSize;
         Color = color;
+    }
+
+    public static TextDraw Default(string text)
+    {
+        return new TextDraw()
+        {
+            Text = text
+        };
     }
 
     public string Text {get; set;}

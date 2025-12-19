@@ -10,7 +10,11 @@ public enum SpriteTile
     Goblin,
     Orc,
     Entin,
-    Ogre
+    Ogre,
+
+    Amulet,
+    Sword,
+    Potion
 
 }
 
@@ -24,7 +28,7 @@ public class DrawSpriteSystem(
     {
         foreach (var (sprite, spritePosition) in sprites)
         {
-            var topLeft = camera.ScreenSpaceTileTopLeft(spritePosition.Value.MapPosition);
+            var topLeft = camera.MapCoordToScreenSpaceTopLeft(spritePosition.Value.MapPosition);
             if (camera.TileIsVisible(topLeft))
             {
                 spriteAtlas.DrawTile(screen, sprite.Value.Tile, topLeft);

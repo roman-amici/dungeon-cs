@@ -13,6 +13,7 @@ public class EnemySpawner(
     Table<Health> healths,
     Table<Damage> damages,
     Table<MovingRandomly> randomMovers,
+    Table<Collision> colliders,
     Random rng) : Spawner
 {
     public void SpawnEnemies(World world)
@@ -46,7 +47,6 @@ public class EnemySpawner(
           11 => SpriteTile.Ogre,
           _ => throw new IndexOutOfRangeException()
         };
-        tile = SpriteTile.Entin;
 
         positions.Add(entityId, new (spawnerContext.SpawnPosition));
         sprites.Add(entityId, new SpriteKey<SpriteTile>(tile));
@@ -54,6 +54,7 @@ public class EnemySpawner(
         healths.Add(entityId, new Health(GetHealth(tile)));
         randomMovers.Add(entityId, new MovingRandomly());
         damages.Add(entityId, new Damage(GetDamage(tile)));
+        colliders.Add(entityId, new Collision());
     }
 
     public string GetName(SpriteTile tile)

@@ -15,7 +15,7 @@ public class DrawHealthBarSystem(Camera camera, Screen screen, TableJoin<Health,
                 continue;
             }
 
-            var screenCoord = camera.ScreenSpaceTileTopLeft(position.Value.MapPosition);
+            var screenCoord = camera.MapCoordToScreenSpaceTopLeft(position.Value.MapPosition);
 
             var healthBarPosition = new Rect2D()
             {

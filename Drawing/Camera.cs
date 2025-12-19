@@ -6,6 +6,8 @@ public class ViewPort(uint widthPixels, uint heightPixels)
 {
     public uint WidthPixels { get; set; } = widthPixels;
     public uint HeightPixels { get; set; } = heightPixels;
+
+    public Point2D Center {get;} = new(widthPixels / 2, heightPixels / 2);
 }
 
 public class Camera(ViewPort viewPort, MapCoord topLeft, uint tileSize)
@@ -24,7 +26,7 @@ public class Camera(ViewPort viewPort, MapCoord topLeft, uint tileSize)
     public MapCoord BottomLeft => new MapCoord(TopLeft.X, TopLeft.Y);
     public MapCoord BottomRight => new MapCoord(TopRight.X, BottomY);
 
-    public Point2D ScreenSpaceTileTopLeft(MapCoord coord)
+    public Point2D MapCoordToScreenSpaceTopLeft(MapCoord coord)
     {
         var xScreen = (coord.X - TopLeft.X) * TileSize;
         var yScreen = (coord.Y - TopLeft.Y) * TileSize;
@@ -34,17 +36,14 @@ public class Camera(ViewPort viewPort, MapCoord topLeft, uint tileSize)
 
     public bool TileIsVisible(MapCoord coord)
     {
-        var screenSpace = ScreenSpaceTileTopLeft(coord);
+        var screenSpace = MapCoordToScreenSpaceTopLeft(coord);
 
         return TileIsVisible(screenSpace);
     }
 
     public bool TileIsVisible(Point2D tileTopLeft)
     {
-        return (tileTopLeft.X > 0 && tileTopLeft.Y > 0) ||
-        (tileTopLeft.X > 0 && tileTopLeft.Y + TileSize > 0) ||
-        (tileTopLeft.X + TileSize > 0 && tileTopLeft.Y > 0) ||
-        (tileTopLeft.X + TileSize > 0 && tileTopLeft.Y + TileSize > 0);
+        return tileTopLeft.X < ViewPort.WidthPixels && tileTopLeft.Y < ViewPort.HeightPixels;
     }
 
     public void SetCenter(MapCoord center)

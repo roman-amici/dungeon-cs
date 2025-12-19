@@ -34,7 +34,7 @@ where U : struct
         {
             for (var j = lastJ; j < T2.Count; j++)
             {
-                if (T1[i].EntityId == T2[i].EntityId)
+                if (T1[i].EntityId == T2[j].EntityId)
                 {
                     yield return (i,j);
 
@@ -48,6 +48,19 @@ where U : struct
                 yield break;
             }
         }
+    }
+
+    public (Component<T>,Component<U>)? FirstWhere(Func<(T,U),bool> predicate)
+    {
+        foreach (var (i,j) in GetIndices())
+        {
+            if (predicate((T1[i].Value,T2[j].Value)))
+            {
+                return (T1[i],T2[j]);
+            }
+        }
+
+        return null;
     }
 
     IEnumerator IEnumerable.GetEnumerator()

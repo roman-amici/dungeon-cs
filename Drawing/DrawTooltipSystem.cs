@@ -25,7 +25,7 @@ public class DrawTooltipSystem(
                 var mouseCoord = camera.ScreenSpaceToMapCoord(mouseLocation.Point.Value);
                 if (position.Value.MapPosition == mouseCoord)
                 {
-                    var start = camera.ScreenSpaceTileTopLeft(position.Value.MapPosition);
+                    var start = camera.MapCoordToScreenSpaceTopLeft(position.Value.MapPosition);
                     start.X += camera.TileSize / 2;
                     start.Y += camera.TileSize / 2;
 
