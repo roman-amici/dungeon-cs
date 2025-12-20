@@ -28,10 +28,10 @@ public class DrawSpriteSystem(
     {
         foreach (var (sprite, spritePosition) in sprites)
         {
-            var topLeft = camera.MapCoordToScreenSpaceTopLeft(spritePosition.Value.MapPosition);
+            var topLeft = camera.MapCoordToScreenSpaceTopLeft(spritePosition.MapPosition);
             if (camera.TileIsVisible(topLeft))
             {
-                spriteAtlas.DrawTile(screen, sprite.Value.Tile, topLeft);
+                spriteAtlas.DrawTile(screen, sprite.Tile, topLeft);
             }
         }
     }

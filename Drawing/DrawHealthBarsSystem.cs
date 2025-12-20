@@ -10,12 +10,12 @@ public class DrawHealthBarSystem(Camera camera, Screen screen, TableJoin<Health,
     {
         foreach (var (health, position) in query)
         {
-            if (!camera.TileIsVisible(position.Value.MapPosition))
+            if (!camera.TileIsVisible(position.MapPosition))
             {
                 continue;
             }
 
-            var screenCoord = camera.MapCoordToScreenSpaceTopLeft(position.Value.MapPosition);
+            var screenCoord = camera.MapCoordToScreenSpaceTopLeft(position.MapPosition);
 
             var healthBarPosition = new Rect2D()
             {
@@ -25,7 +25,7 @@ public class DrawHealthBarSystem(Camera camera, Screen screen, TableJoin<Health,
 
             screen.DrawRect(healthBarPosition, Color.Black);
 
-            var redBarLength = health.Value.CurrentHealth / health.Value.MaxHealth * camera.TileSize;
+            var redBarLength = health.CurrentHealth / health.MaxHealth * camera.TileSize;
             var redBar = new Rect2D()
             {
                 TopLeft = healthBarPosition.TopLeft,

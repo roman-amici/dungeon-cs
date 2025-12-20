@@ -2,37 +2,56 @@ using System.Collections;
 
 namespace Ecs;
 
-public class SingletonJoin<TSingle,TTable> : IEnumerable<(Component<TSingle>, Component<TTable>)>
+public class SingletonJoin<TSingle,TTable>
     where TSingle : struct
     where TTable : struct
 {
     public SingletonJoin(Singleton<TSingle> single, Table<TTable> table)
     {
-        Single = single;
-        Table = table;
+        S = single;
+        T = table;
     }
 
-    public Singleton<TSingle> Single {get;}
-    public Table<TTable> Table {get;}
+    public Singleton<TSingle> S {get;}
+    public Table<TTable> T {get;}
 
-    public IEnumerator<(Component<TSingle>, Component<TTable>)> GetEnumerator()
+    public (TSingle,TTable)? Join
     {
-        if (Single.First == null)
+        get
         {
-            yield break;
-        }
-
-        for (var i = 0; i < Table.Count; i++)
-        {
-            if (Table[i].EntityId == Single.First.Value.EntityId)
+            if (S.SingletComponent == null)
             {
-                yield return (Single.First.Value, Table[i]);
+                return null;
             }
+
+            var t = T.Find(S.SingletComponent.Value.EntityId);
+
+            if (t == null)
+            {
+                return null;
+            }
+
+            return (S.SingletComponent.Value.Value, t.Value);
         }
     }
 
-    IEnumerator IEnumerable.GetEnumerator()
+        public (Component<TSingle>,Component<TTable>)? JoinComponent
     {
-        return GetEnumerator();
+        get
+        {
+            if (S.SingletComponent == null)
+            {
+                return null;
+            }
+
+            var t = T.FindComponent(S.SingletComponent.Value.EntityId);
+
+            if (t == null)
+            {
+                return null;
+            }
+
+            return (S.SingletComponent.Value, t.Value);
+        }
     }
 }

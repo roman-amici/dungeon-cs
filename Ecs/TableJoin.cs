@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace Ecs;
 
-public class TableJoin<T, U> : IEnumerable<(Component<T>, Component<U>)>
+public class TableJoin<T, U> : IEnumerable<(T, U)>
 where T : struct
 where U : struct
 
@@ -18,11 +18,56 @@ where U : struct
     public Table<T> T1 {get;}
     public Table<U> T2 {get;}
 
-    public IEnumerator<(Component<T>, Component<U>)> GetEnumerator()
+
+    public (T,U) this[int indexT, int indexU]
+    {
+        get
+        {
+            return (T1[indexT],T2[indexU]);
+        }
+    }
+
+    public (T,U) this[EntityId entityId]
+    {
+        get
+        {
+            var t = T1[entityId];
+            var u = T2[entityId];
+
+            return (t,u);
+        }
+    }
+
+    public (T,U)? Find(EntityId entityId)
+    {
+        var t = T1.Find(entityId);
+        if (t == null)
+        {
+            return null;
+        }
+
+        var u = T2.Find(entityId);
+        if (u == null)
+        {
+            return null;
+        }
+
+        return (t.Value,u.Value);
+    }
+
+    public IEnumerator<(T, U)> GetEnumerator()
     {
         foreach (var (i,j) in GetIndices())
         {
             yield return (T1[i],T2[j]);
+        }
+    }
+
+    public IEnumerable<(Component<T>,Component<U>)> Components()
+    {
+        foreach (var (i,j) in GetIndices())
+        {
+            yield return (T1.GetComponent(i),T2.GetComponent(j));
         }
     }
 
@@ -34,7 +79,7 @@ where U : struct
         {
             for (var j = lastJ; j < T2.Count; j++)
             {
-                if (T1[i].EntityId == T2[j].EntityId)
+                if (T1.GetComponent(i).EntityId == T2.GetComponent(j).EntityId)
                 {
                     yield return (i,j);
 
@@ -50,11 +95,11 @@ where U : struct
         }
     }
 
-    public (Component<T>,Component<U>)? FirstWhere(Func<(T,U),bool> predicate)
+    public (T,U)? FindWhere(Func<(T,U),bool> predicate)
     {
         foreach (var (i,j) in GetIndices())
         {
-            if (predicate((T1[i].Value,T2[j].Value)))
+            if (predicate((T1[i],T2[j])))
             {
                 return (T1[i],T2[j]);
             }
@@ -63,17 +108,22 @@ where U : struct
         return null;
     }
 
+    public (Component<T>,Component<U>)? FindComponentWhere(Func<(T,U),bool> predicate)
+    {
+        foreach (var (i,j) in GetIndices())
+        {
+            if (predicate((T1[i],T2[j])))
+            {
+                return (T1.GetComponent(i),T2.GetComponent(j));
+            }
+        }
+
+        return null;
+    }
+
+
     IEnumerator IEnumerable.GetEnumerator()
     {
         return GetEnumerator();
-    }
-
-    public (T,U) this[int indexT, int indexU]
-    {
-        get
-        {
-            return (T1[indexT].Value,T2[indexU].Value);
-        }
-
     }
 }

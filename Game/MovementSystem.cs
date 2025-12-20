@@ -27,14 +27,15 @@ public class MovementSystem(
                 continue;
             }
 
-            var occupied = colliders.FirstWhere((t) => t.Item2.MapPosition == move.NewPosition.MapPosition);
+            var occupied = colliders.FindComponentWhere((t) => t.Item2.MapPosition == move.NewPosition.MapPosition);
             if (occupied == null)
             {
                 positions.Update(move.Entity, move.NewPosition);
             }
             else
             {
-                if (enemies.FirstWhere(x => x.EntityId == occupied.Value.Item2.EntityId) != null)
+                var (_,position) = occupied.Value;
+                if (enemies.Find(position.EntityId) != null)
                 {
                     attacks.Enqueue(new WantsToAttackMessage(move.Entity, occupied.Value.Item2.EntityId));
                 }

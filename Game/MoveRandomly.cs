@@ -16,7 +16,7 @@ public class MoveRandomlySystem(
 {
     public override void Execute()
     {
-        foreach( var (_,position) in movers)
+        foreach( var (_,position) in movers.Components())
         {
             var coord = rng.Next(0,5) switch
             {

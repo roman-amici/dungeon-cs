@@ -10,18 +10,19 @@ public class PickupItemSystem(
 {
     public override void Execute()
     {
-        if (!playerPosition.Any())
+        var pPosition = playerPosition.Join;
+        if (pPosition == null)
         {
             return;
         }
 
-        var (_,player) = playerPosition.First();
+        var (_,player) = pPosition.Value;
 
         foreach(var (item,itemPosition) in itemPosition)
         {
-            if (itemPosition.Value.MapPosition == player.Value.MapPosition)
+            if (itemPosition.MapPosition == player.MapPosition)
             {
-                inventory.Items.Add(item.Value.ItemType);
+                inventory.Items.Add(item.ItemType);
             }
         }
 

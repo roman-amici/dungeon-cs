@@ -64,15 +64,15 @@ public class ItemSpawner(
 
     private void SpawnAmulet(EntityId entity)
     {
-        var (_,position) = playerPosition.First();
+        var (_,position) = playerPosition.Join!.Value;
 
         if (playerDistance.IsDirty)
         {
-            playerDistance.UpdateFromMap(position.Value.MapPosition, (coord) => map.Map[coord.X,coord.Y] == MapTile.Floor);
+            playerDistance.UpdateFromMap(position.MapPosition, (coord) => map.Map[coord.X,coord.Y] == MapTile.Floor);
         }
 
         uint maxDistance = 0;
-        var maxPosition = position.Value.MapPosition;
+        var maxPosition = position.MapPosition;
         for (var x = 0; x <  playerDistance.Map.GetLength(0); x++)
         {
             for (var y = 0; y < playerDistance.Map.GetLength(1); y++)

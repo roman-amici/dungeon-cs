@@ -1,29 +1,56 @@
+using System.Collections;
 using System.ComponentModel;
 using System.Security.Cryptography.X509Certificates;
 
 namespace Ecs;
 
 // Base table not optimized for insertions or removals
-public class Table<T> : List<Component<T>>, IComponentContainer where T : struct
+public class Table<T> : IComponentContainer, IEnumerable<T>
+    where T : struct
 {
+    private List<Component<T>> data = new();
 
-    public new void Add(Component<T> value)
+    public int Count => data.Count;
+
+    public IEnumerator<T> GetEnumerator()
     {
-        if (this.Any(x => x.EntityId == value.EntityId))
-        {
-            throw new InvalidOperationException($"Entity with id {value.EntityId} already exists");
-        }
-
         for (var i = 0; i < Count; i++)
         {
-            if (value.EntityId.Id > this[i].EntityId.Id)
+            yield return data[i].Value;
+        }
+    }
+
+    public IEnumerable<Component<T>> Components()
+    {
+        for (var i = 0; i < Count; i++)
+        {
+            yield return data[i];
+        }
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
+    }
+
+    public void Add(Component<T> value)
+    {
+
+        for (var i = 0; i < data.Count; i++)
+        {
+            if(value.EntityId == data[i].EntityId)
             {
-                Insert(i, value);
+                throw new InvalidOperationException($"Entity {value.EntityId} already added.");
+            }
+
+            if (value.EntityId.Id > data[i].EntityId.Id)
+            {
+                data.Insert(i, value);
                 return;
             }
         }
 
-        base.Add(value);
+        data.Add(value);
     }
 
     public void Add(EntityId entityId, T value)
@@ -33,58 +60,105 @@ public class Table<T> : List<Component<T>>, IComponentContainer where T : struct
 
     public void Update(int i, T value)
     {
-        var component = base[i];
-        base[i] = new Component<T>(component.EntityId, value);
+        var component = data[i];
+        data[i] = new Component<T>(component.EntityId, value);
     }
 
-    public void Update(EntityId id, T Value)
+    public int Update(EntityId entityId, T value)
     {
-        var i = FindIndex(x => x.EntityId == id);
-        if (i >= 0)
+        for(var i = 0; i < data.Count; i++)
         {
-            Update(i,Value);
-        }
-    }
-
-    public new Component<T> this[int i]
-    {
-        get => base[i];
-        set => throw new InvalidOperationException("Use Update instead");
-    }
-
-    public T? GetEntity(EntityId entityId)
-    {
-        var index = FindIndex(x => x.EntityId == entityId);
-
-        if (index <= 0)
-        {
-            return null;
-        }
-
-        return base[index].Value;
-    }
-
-    public void RemoveEntity(EntityId entityId)
-    {
-        var index = -1;
-        for (var i = 0; i < Count; i++)
-        {
-            if (base[i].EntityId == entityId)
+            if (data[i].EntityId == entityId)
             {
-                index = i;
-                break;
+                Update(i,value);
+
+                return i;
             }
         }
 
-        if (index >= 0)
+        return -1;
+    }
+
+    public T this[int i]
+    {
+        get => data[i].Value;
+    }
+
+    public T this[EntityId entityId]
+    {
+        get
         {
-            RemoveAt(index);
+            var e = Find(entityId);
+            if (e == null)
+            {
+                throw new IndexOutOfRangeException($"No entity {entityId} in table");
+            }
+
+            return e.Value;
         }
     }
 
-    public Component<T>? FirstWhere(Func<Component<T>, bool> predicate)
+    public Component<T> GetComponent(int i)
     {
-        foreach(var component in this)
+        return data[i];
+    }
+
+    public T? Find(EntityId entityId)
+    {
+        for(var i = 0; i < data.Count; i++)
+        {
+            if (data[i].EntityId == entityId)
+            {
+                return data[i].Value;
+            }
+        }
+
+        return null;
+    }
+
+    public Component<T>? FindComponent(EntityId entityId)
+    {
+        for(var i = 0; i < data.Count; i++)
+        {
+            if (data[i].EntityId == entityId)
+            {
+                return data[i];
+            }
+        }
+
+        return null;
+    }
+
+    public bool Remove(EntityId entityId)
+    {
+        for (var i = 0; i < data.Count; i++)
+        {
+            if (data[i].EntityId == entityId)
+            {
+                data.RemoveAt(i);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public T? FindWhere(Func<T, bool> predicate)
+    {
+        foreach(var component in data)
+        {
+            if (predicate(component.Value))
+            {
+                return component.Value;
+            }
+        }
+
+        return null;
+    }
+
+    public Component<T>? FindWhereComponent(Func<Component<T>,bool> predicate)
+    {
+        foreach(var component in data)
         {
             if (predicate(component))
             {
@@ -93,5 +167,10 @@ public class Table<T> : List<Component<T>>, IComponentContainer where T : struct
         }
 
         return null;
+    }
+
+     void IComponentContainer.RemoveEntity(EntityId entityId)
+    {
+        Remove(entityId);
     }
 }

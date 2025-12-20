@@ -21,12 +21,13 @@ public class PlayerInputSystem(
             mouseLocation.Point = mouseMoveEvent.Position;
         }
 
-        if (!playerPosition.Any())
+        var p = playerPosition.Join;
+        if (p == null)
         {
             return;
         }
 
-        var (_,position) = playerPosition.First();
+        var (_,position) = p.Value;
         foreach(var keyEvent in inputParser.KeyboardEvents)
         {
             if (!keyEvent.IsDown)
@@ -44,16 +45,16 @@ public class PlayerInputSystem(
             switch (keyEvent.Key)
             {
                 case Key.Down:
-                    newPosition = position.Value.MapPosition.Down();
+                    newPosition = position.MapPosition.Down();
                     break;
                 case Key.Up:
-                    newPosition = position.Value.MapPosition.SafeUp();
+                    newPosition = position.MapPosition.SafeUp();
                     break;
                 case Key.Left:
-                    newPosition = position.Value.MapPosition.SafeLeft();
+                    newPosition = position.MapPosition.SafeLeft();
                     break;
                 case Key.Right:
-                    newPosition = position.Value.MapPosition.Right();
+                    newPosition = position.MapPosition.Right();
                     break;
             }
 

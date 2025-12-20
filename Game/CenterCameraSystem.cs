@@ -9,11 +9,12 @@ public class CenterCameraOnPlayerSystem(
 {
     public override void Execute()
     {
-        if (playerPosition.Any())
+        var pPosition = playerPosition.Join;
+        if (pPosition != null)
         {
-            var (_,position) = playerPosition.First();
+            var (_,position) = pPosition.Value;
 
-            camera.SetCenter(position.Value.MapPosition);
+            camera.SetCenter(position.MapPosition);
         }
     }
 }

@@ -20,16 +20,16 @@ public class DrawTooltipSystem(
 
         foreach (var (tooltip, position) in tooltipPositions)
         {
-            if (camera.TileIsVisible(position.Value.MapPosition))
+            if (camera.TileIsVisible(position.MapPosition))
             {
                 var mouseCoord = camera.ScreenSpaceToMapCoord(mouseLocation.Point.Value);
-                if (position.Value.MapPosition == mouseCoord)
+                if (position.MapPosition == mouseCoord)
                 {
-                    var start = camera.MapCoordToScreenSpaceTopLeft(position.Value.MapPosition);
+                    var start = camera.MapCoordToScreenSpaceTopLeft(position.MapPosition);
                     start.X += camera.TileSize / 2;
                     start.Y += camera.TileSize / 2;
 
-                    textReader.DrawTextCentered(new (tooltip.Value.Text, 14, Color.White), start);
+                    textReader.DrawTextCentered(new (tooltip.Text, 14, Color.White), start);
                 }
 
             }

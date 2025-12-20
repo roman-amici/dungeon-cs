@@ -12,8 +12,8 @@ public class CombatSystem(
         while(attackMessages.TryDequeue(out var attack))
         {
 
-            var health = healths.GetEntity(attack.Attacked);
-            var damage = damages.GetEntity(attack.Attacker);
+            var health = healths.Find(attack.Attacked);
+            var damage = damages.Find(attack.Attacker);
 
             if (health is Health h && damage is Damage d)
             {

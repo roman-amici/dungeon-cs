@@ -10,21 +10,23 @@ public class Singleton<T> : IComponentContainer where T : struct
 
     public void Spawn(EntityId entityId, T value)
     {
-        if (First != null)
+        if (Singlet != null)
         {
             throw new InvalidOperationException("Singleton already spawned");
         }
 
-        First = new Component<T>(entityId,value);
+        SingletComponent = new Component<T>(entityId,value);
     }
 
-    public Component<T>? First {get; private set;}
+    public T? Singlet => SingletComponent?.Value;
+
+    public Component<T>? SingletComponent {get; private set;}
 
     public void RemoveEntity(EntityId entityId)
     {
-        if (First?.EntityId == entityId)
+        if (SingletComponent?.EntityId == entityId)
         {
-            First = null;
+            SingletComponent = null;
         }
     }
 }

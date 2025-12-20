@@ -7,7 +7,7 @@ public class KillEntitiesSystem(World world, Table<Health> healths, Singleton<Pl
     public override void Execute()
     {
         var toKill = new List<EntityId>();
-        foreach(var health in healths)
+        foreach(var health in healths.Components())
         {
             if (health.Value.CurrentHealth < 0)
             {
@@ -20,7 +20,7 @@ public class KillEntitiesSystem(World world, Table<Health> healths, Singleton<Pl
             world.RemoveEntity(entityId);
         }
 
-        if (player.First == null)
+        if (player.Singlet == null)
         {
             state.CurrentState = GameState.PlayerLoose;
         }
