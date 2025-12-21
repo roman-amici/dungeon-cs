@@ -1,6 +1,14 @@
 namespace Ecs;
 
-public abstract class Spawner
+public abstract class SpawningSystem<TContext>(World world) : GameSystem
 {
-    public abstract void Spawn(EntityId entityId, object? context = null);
+
+    public World World {get;} = world;
+
+    protected void SpawnEntity(TContext context)
+    {
+        Spawn(World.SpawnEntity(), context);
+    }
+
+    protected abstract void Spawn(EntityId entityId, TContext context);
 }

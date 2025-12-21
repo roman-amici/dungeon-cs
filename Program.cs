@@ -113,16 +113,17 @@ world.AddComponent(colliders);
 var inventory = new PlayerInventory();
 world.AddResource(inventory);
 
-world.SpawnEntity(new PlayerSpawner(map, sprites,positions, player, healths, toolTips, damages, colliders), null);
+var playerSpawner = world.CreateInstance<PlayerSpawner>();
+playerSpawner.Execute();
 
-var enemySpawner = new EnemySpawner(map, positions, sprites, enemies, toolTips, healths, damages, randomMovers, colliders, rng);
-enemySpawner.SpawnEnemies(world);
+var enemySpawner = world.CreateInstance<EnemySpawner>();
+enemySpawner.Execute();
 
 var distanceMap = new DistanceMap(map.Width,map.Height);
 world.AddResource(distanceMap);
 
-var itemSpawner = new ItemSpawner(map, distanceMap, new SingletonJoin<Player, Position>(player,positions), positions, pickupItems, sprites);
-itemSpawner.SpawnItems(world, rng);
+var itemSpawner = world.CreateInstance<ItemSpawner>();
+itemSpawner.Execute();
 
 var inputParser = new InputParser();
 world.AddResource(inputParser);
@@ -133,42 +134,26 @@ world.AddResource(new Queue<WantsToAttackMessage>());
 var mouseLocation = new MouseLocation();
 world.AddResource(mouseLocation);
 
-var turnScheduler = world.CreateSystem<TurnStateScheduler>();
+var turnScheduler = world.CreateInstance<TurnStateScheduler>();
 
 var playerActionQueue = new Queue<PlayerAction>();
 world.AddResource(playerActionQueue);
 
-world.AddSingletonJoin<Player,Health>();
-var playerActions = world.CreateSystem<PlayerActionSystem>();
+var playerActions = world.CreateInstance<PlayerActionSystem>();
+var moveRandomly = world.CreateInstance<MoveRandomlySystem>();
+var playerInput = world.CreateInstance<PlayerInputSystem>();
+var movement  = world.CreateInstance<MovementSystem>(); 
+var combat = world.CreateInstance<CombatSystem>();
+var kill = world.CreateInstance<KillEntitiesSystem>();
+var centerCamera = world.CreateInstance<CenterCameraOnPlayerSystem>();
+var drawMap = world.CreateInstance<DrawMapSystem>();
+var drawSprite = world.CreateInstance<DrawSpriteSystem>();
+var drawTooltips = world.CreateInstance<DrawTooltipSystem>();
+var drawHealthBar = world.CreateInstance<DrawHealthBarSystem>();
+var playerPickupItem = world.CreateInstance<PickupItemSystem>(); 
+var debugDraw = world.CreateInstance<DistanceDisplaySystem>();
 
-world.AddTableJoin<MovingRandomly, Position>();
-var moveRandomly = world.CreateSystem<MoveRandomlySystem>();
-
-world.AddSingletonJoin<Player,Position>();
-var playerInput = world.CreateSystem<PlayerInputSystem>();
-
-world.AddTableJoin<Collision,Position>();
-var movement  = world.CreateSystem<MovementSystem>(); 
-var combat = world.CreateSystem<CombatSystem>();
-var kill = world.CreateSystem<KillEntitiesSystem>();
-
-var centerCamera = world.CreateSystem<CenterCameraOnPlayerSystem>();
-var drawMap = world.CreateSystem<DrawMapSystem>();
-
-world.AddTableJoin<SpriteKey<SpriteTile>,Position>();
-var drawSprite = world.CreateSystem<DrawSpriteSystem>();
-
-world.AddTableJoin<ToolTip,Position>();
-var drawTooltips = world.CreateSystem<DrawTooltipSystem>();
-
-world.AddTableJoin<Health,Position>();
-var drawHealthBar = world.CreateSystem<DrawHealthBarSystem>();
-
-world.AddTableJoin<PickupItem,Position>();
-var playerPickupItem = world.CreateSystem<PickupItemSystem>(); 
-var debugDraw = world.CreateSystem<DistanceDisplaySystem>();
-
-var endTurn = world.CreateSystem<EndTurnSystem>();
+var endTurn = world.CreateInstance<EndTurnSystem>();
 
 turnScheduler.AwaitingInput.AddRange([
    playerInput,
@@ -208,8 +193,8 @@ turnScheduler.EnemyTurn.AddRange([
    drawHealthBar,
 ]);
 
-var menus = world.CreateSystem<MenuScheduler>();
-var overlays = world.CreateSystem<OverlaysSystem>();
+var menus = world.CreateInstance<MenuScheduler>();
+var overlays = world.CreateInstance<OverlaysSystem>();
 overlays.Menu = menus;
 overlays.Gameplay = turnScheduler;
 

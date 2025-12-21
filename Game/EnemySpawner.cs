@@ -5,6 +5,7 @@ using Map;
 namespace Game;
 
 public class EnemySpawner(
+    World world,
     DungeonMap<MapTile> map,
     Table<Position> positions,
     Table<SpriteKey<SpriteTile>> sprites,
@@ -14,28 +15,23 @@ public class EnemySpawner(
     Table<Damage> damages,
     Table<MovingRandomly> randomMovers,
     Table<Collision> colliders,
-    Random rng) : Spawner
+    Random rng) : SpawningSystem<EnemySpawnerContext>(world)
 {
-    public void SpawnEnemies(World world)
+    public override void Execute()
     {
         foreach(var room in map.Rooms)
         {
             var position = room.Center;
 
-            world.SpawnEntity(this, new EnemySpawnerContext
+            SpawnEntity(new EnemySpawnerContext
             {
                  SpawnPosition = position
             });
-
         }
     }
 
-    public override void Spawn(EntityId entityId, object? context)
+    protected override void Spawn(EntityId entityId, EnemySpawnerContext context)
     {
-        if (context is not EnemySpawnerContext spawnerContext)
-        {
-            throw new InvalidOperationException("Incorrect type");
-        }
 
         enemies.Add(entityId, new());
 
@@ -48,7 +44,7 @@ public class EnemySpawner(
           _ => throw new IndexOutOfRangeException()
         };
 
-        positions.Add(entityId, new (spawnerContext.SpawnPosition));
+        positions.Add(entityId, new (context.SpawnPosition));
         sprites.Add(entityId, new SpriteKey<SpriteTile>(tile));
         tooltips.Add(entityId, new ToolTip(GetName(tile)));
         healths.Add(entityId, new Health(GetHealth(tile)));

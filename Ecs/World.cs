@@ -1,3 +1,4 @@
+using System.Reflection;
 using Ecs;
 
 public class World()
@@ -18,13 +19,11 @@ public class World()
         }
     }
 
-    public EntityId SpawnEntity(Spawner spawner, object? context)
+    public EntityId SpawnEntity()
     {
         var entityId = new EntityId(NextEntityId++);
 
         Entities.Add(entityId);
-
-        spawner.Spawn(entityId, context);
 
         return entityId;
     }
@@ -91,8 +90,34 @@ public class World()
         Joins.Add(joinType, new SingletonJoin<T,U>((Singleton<T>)singleton,(Table<U>)table));
     }
 
-    public T CreateSystem<T>()
-    where T : GameSystem
+    public IComponentJoin AddJoin(Type joinType)
+    {
+        var constructors = joinType.GetConstructors();
+        if (constructors.Length > 1)
+        {
+            throw new InvalidOperationException("Game system has more than one constructor");
+        }
+
+        var constructor = constructors.First();
+
+        var parameterValues = new List<object>();
+        foreach( var parameter in constructor.GetParameters())
+        {
+            var parameterType = parameter.ParameterType;
+            if (Components.TryGetValue(parameterType, out var component))
+            {
+                parameterValues.Add(component);
+            }
+            else
+            {
+                throw new InvalidOperationException($"Unknown component {parameterType}");
+            }
+        }
+
+        return (IComponentJoin)constructor.Invoke(parameterValues.ToArray());
+    }
+
+    public T CreateInstance<T>()
     {
         var systemType = typeof(T);
 
@@ -120,13 +145,21 @@ public class World()
             {
                 parameterValues.Add(resource);
             }
-            else if(Joins.TryGetValue(parameterType, out var join))
-            {
-                parameterValues.Add(join);
-            }
             else
             {
-                throw new InvalidOperationException($"Missing parameter {parameterType}");
+                if(Joins.TryGetValue(parameterType, out var join))
+                {
+                    parameterValues.Add(join);
+                }
+                else if( parameterType.GetInterfaces().Any(x => x == typeof(IComponentJoin)))
+                {
+                    parameterValues.Add(AddJoin(parameterType));
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Missing parameter {parameterType}");
+                }
+
             }
         }
 

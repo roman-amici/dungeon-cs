@@ -5,16 +5,18 @@ using Map;
 namespace Game;
 
 public class ItemSpawner( 
+    World world,
     DungeonMap<MapTile> map, 
     DistanceMap playerDistance, 
-    SingletonJoin<Player,Position> playerPosition, 
+    SingletonJoin<Player,Position> playerPosition,
+    Random rng,
     Table<Position> positions, 
     Table<PickupItem> items,
-    Table<SpriteKey<SpriteTile>> sprites) : Spawner
+    Table<SpriteKey<SpriteTile>> sprites) : SpawningSystem<ItemSpawner.ItemSpawnerContext>(world)
 {
-    public void SpawnItems(World world, Random rng)
+    public override void Execute()
     {
-        world.SpawnEntity(this, new ItemSpawnerContext(new(), ItemType.Amulet));
+        SpawnEntity(new ItemSpawnerContext(new(), ItemType.Amulet));
 
         foreach(var room in map.Rooms)
         {
@@ -27,33 +29,29 @@ public class ItemSpawner(
 
             if (i == 10)
             {
-                world.SpawnEntity(this, new ItemSpawnerContext(room.Center, ItemType.SwordUpgrade));
+                SpawnEntity(new ItemSpawnerContext(room.Center, ItemType.SwordUpgrade));
             }
             else
             {
-                world.SpawnEntity(this, new ItemSpawnerContext(room.Center, ItemType.Potion));
+                SpawnEntity(new ItemSpawnerContext(room.Center, ItemType.Potion));
             }
         }
     }
 
-    public override void Spawn(EntityId entityId, object? context = null)
+    protected override void Spawn(EntityId entityId, ItemSpawnerContext context)
     {
-        if (context is not ItemSpawnerContext itemContext)
-        {
-            return;
-        }
 
-        switch (itemContext.ItemType)
+        switch (context.ItemType)
         {
             case ItemType.Amulet:
                 SpawnAmulet(entityId);
                 break;
             default:
-                SpawnItem(entityId, itemContext);
+                SpawnItem(entityId, context);
                 break;
         }
 
-        sprites.Add(entityId, new(GetTile(itemContext.ItemType)));
+        sprites.Add(entityId, new(GetTile(context.ItemType)));
     }
 
     private void SpawnItem(EntityId entityId, ItemSpawnerContext context)
@@ -106,7 +104,7 @@ public class ItemSpawner(
         };
     }
 
-    struct ItemSpawnerContext(MapCoord location, ItemType itemType)
+    public struct ItemSpawnerContext(MapCoord location, ItemType itemType)
     {
         public MapCoord Location {get;} = location;
         public ItemType ItemType {get;} = itemType;

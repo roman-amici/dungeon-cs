@@ -5,6 +5,7 @@ using Map;
 namespace Game;
 
 public class PlayerSpawner(
+    World world,
     DungeonMap<MapTile> map,
     Table<SpriteKey<SpriteTile>> sprites,
     Table<Position> positions,
@@ -13,9 +14,14 @@ public class PlayerSpawner(
     Table<ToolTip> toolTip,
     Table<Damage> damages,
     Table<Collision> colliders
-) : Spawner
+) : SpawningSystem<object?>(world)
 {
-    public override void Spawn(EntityId entityId, object? _)
+    public override void Execute()
+    {
+        SpawnEntity(null);
+    }
+
+    protected override void Spawn(EntityId entityId, object? _)
     {
         player.Spawn(entityId, new());
 
@@ -50,6 +56,5 @@ public class PlayerSpawner(
         toolTip.Add(entityId, new ToolTip("Player"));
         damages.Add(entityId, new Damage(1.0));
         colliders.Add(entityId, new Collision());
-
     }
 }
