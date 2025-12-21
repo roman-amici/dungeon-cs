@@ -44,17 +44,23 @@ if (SDL_ttf.TTF_Init() < 0)
     throw new Exception($"Failed to initialize ttf: {err}");
 }
 
-
-
 var world = new World();
 var mapGenerator = new MapGenerator(256, 256);
 var rng = new Random();
+world.AddResource(rng);
+
 var map = mapGenerator.Generate(rng);
+world.AddResource(map);
+
 var viewPort = new ViewPort(640, 480);
+world.AddResource(viewPort);
+
 var camera = new Camera(viewPort, map.Center, 32);
+world.AddResource(camera);
 
 var sheet = Texture.LoadTexture(renderer, "dungeonfont.png");
 var mapTileAtlas = new TileAtlas<MapTile>(sheet, 32);
+world.AddResource(mapTileAtlas);
 
 mapTileAtlas.AddGridTile(MapTile.Wall, 32, 3, 2);
 mapTileAtlas.AddGridTile(MapTile.Floor, 32, 14, 2);
@@ -68,19 +74,20 @@ spriteAtlas.AddGridTile(SpriteTile.Ogre, 32, 5, 4);
 spriteAtlas.AddGridTile(SpriteTile.Amulet, 32, 12, 7);
 spriteAtlas.AddGridTile(SpriteTile.Sword, 32, 3, 5);
 spriteAtlas.AddGridTile(SpriteTile.Potion, 32, 1, 2);
-
+world.AddResource(spriteAtlas);
 
 var screen = new Screen(renderer);
+world.AddResource(screen);
 
 var font = Font.LoadFont("FreeMono.ttf");
 var textRenderer = new TextRenderer(screen, font);
+world.AddResource(textRenderer);
 
-var turn = new Turn()
+world.AddResource(new Turn()
 {
     CurrentTurn = GameTurn.AwaitingInput
-};
-
-var gameState = new GameStateResource(GameState.GameRun);
+});
+world.AddResource(new GameStateResource(GameState.GameRun));
 
 var sprites = new Table<SpriteKey<SpriteTile>>();
 var positions = new Table<Position>();
@@ -103,6 +110,8 @@ world.AddComponent(randomMovers);
 world.AddComponent(pickupItems);
 world.AddComponent(colliders);
 
+var inventory = new PlayerInventory();
+world.AddResource(inventory);
 
 world.SpawnEntity(new PlayerSpawner(map, sprites,positions, player, healths, toolTips, damages, colliders), null);
 
@@ -110,37 +119,56 @@ var enemySpawner = new EnemySpawner(map, positions, sprites, enemies, toolTips, 
 enemySpawner.SpawnEnemies(world);
 
 var distanceMap = new DistanceMap(map.Width,map.Height);
+world.AddResource(distanceMap);
+
 var itemSpawner = new ItemSpawner(map, distanceMap, new SingletonJoin<Player, Position>(player,positions), positions, pickupItems, sprites);
 itemSpawner.SpawnItems(world, rng);
 
 var inputParser = new InputParser();
+world.AddResource(inputParser);
 
-var moveQueue = new Queue<WantsToMoveMessage>();
-var attackQueue = new Queue<WantsToAttackMessage>();
+world.AddResource(new Queue<WantsToMoveMessage>());
+world.AddResource(new Queue<WantsToAttackMessage>());
 
-var turnScheduler = new TurnStateScheduler(turn);
 var mouseLocation = new MouseLocation();
+world.AddResource(mouseLocation);
+
+var turnScheduler = world.CreateSystem<TurnStateScheduler>();
+
 var playerActionQueue = new Queue<PlayerAction>();
+world.AddResource(playerActionQueue);
 
-var playerActions = new PlayerActionSystem(playerActionQueue, moveQueue, new SingletonJoin<Player, Health>(player, healths));
+world.AddSingletonJoin<Player,Health>();
+var playerActions = world.CreateSystem<PlayerActionSystem>();
 
-var moveRandomly = new MoveRandomlySystem(moveQueue, new TableJoin<MovingRandomly, Position>(randomMovers, positions), rng);
-var playerInput =  new PlayerInputSystem(inputParser, new SingletonJoin<Player, Position>(player,positions), mouseLocation, playerActionQueue, turn);
-var movement = new MovementSystem(map, moveQueue, attackQueue, positions, new TableJoin<Collision, Position>(colliders,positions), enemies);
-var combat = new CombatSystem(attackQueue, damages, healths);
-var kill = new KillEntitiesSystem(world, healths, player, gameState);
+world.AddTableJoin<MovingRandomly, Position>();
+var moveRandomly = world.CreateSystem<MoveRandomlySystem>();
 
-var inventory = new PlayerInventory();
+world.AddSingletonJoin<Player,Position>();
+var playerInput = world.CreateSystem<PlayerInputSystem>();
 
-var centerCamera = new CenterCameraOnPlayerSystem(camera, new SingletonJoin<Player, Position>(player,positions));
-var drawMap = new DrawMapSystem(map, camera, mapTileAtlas, screen);
-var drawSprite = new DrawSpriteSystem(camera, spriteAtlas, screen, new TableJoin<SpriteKey<SpriteTile>, Position>(sprites,positions));
-var drawTooltips = new DrawTooltipSystem(camera, textRenderer, mouseLocation, new TableJoin<ToolTip, Position>(toolTips,positions));
-var drawHealthBar = new DrawHealthBarSystem(camera,screen, new TableJoin<Health, Position>(healths,positions));
-var playerPickupItem = new PickupItemSystem(new SingletonJoin<Player, Position>(player,positions), new TableJoin<PickupItem, Position>(pickupItems,positions), inventory, gameState);
-var debugDraw = new DistanceDisplaySystem(camera, textRenderer, distanceMap);
+world.AddTableJoin<Collision,Position>();
+var movement  = world.CreateSystem<MovementSystem>(); 
+var combat = world.CreateSystem<CombatSystem>();
+var kill = world.CreateSystem<KillEntitiesSystem>();
 
-var endTurn = new EndTurnSystem(turn);
+var centerCamera = world.CreateSystem<CenterCameraOnPlayerSystem>();
+var drawMap = world.CreateSystem<DrawMapSystem>();
+
+world.AddTableJoin<SpriteKey<SpriteTile>,Position>();
+var drawSprite = world.CreateSystem<DrawSpriteSystem>();
+
+world.AddTableJoin<ToolTip,Position>();
+var drawTooltips = world.CreateSystem<DrawTooltipSystem>();
+
+world.AddTableJoin<Health,Position>();
+var drawHealthBar = world.CreateSystem<DrawHealthBarSystem>();
+
+world.AddTableJoin<PickupItem,Position>();
+var playerPickupItem = world.CreateSystem<PickupItemSystem>(); 
+var debugDraw = world.CreateSystem<DistanceDisplaySystem>();
+
+var endTurn = world.CreateSystem<EndTurnSystem>();
 
 turnScheduler.AwaitingInput.AddRange([
    playerInput,
@@ -180,10 +208,10 @@ turnScheduler.EnemyTurn.AddRange([
    drawHealthBar,
 ]);
 
-var menus = new MenuScheduler(gameState, viewPort, textRenderer, screen);
-var overlays = new OverlaysSystem(turnScheduler, menus, gameState);
-
-world.Systems.Add(overlays);
+var menus = world.CreateSystem<MenuScheduler>();
+var overlays = world.CreateSystem<OverlaysSystem>();
+overlays.Menu = menus;
+overlays.Gameplay = turnScheduler;
 
 bool PollEvents()
 {
@@ -209,7 +237,7 @@ while (running)
 {
     SDL.SDL_RenderClear(renderer);
     running = PollEvents();
-    world.Execute();
+    overlays.Execute();
     SDL.SDL_RenderPresent(renderer);
 }
 

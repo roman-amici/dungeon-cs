@@ -2,7 +2,7 @@ using System.Collections;
 
 namespace Ecs;
 
-public class SingletonJoin<TSingle,TTable>
+public class SingletonJoin<TSingle,TTable> : IComponentJoin
     where TSingle : struct
     where TTable : struct
 {

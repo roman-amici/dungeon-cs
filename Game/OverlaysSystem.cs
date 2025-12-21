@@ -2,17 +2,20 @@ using Ecs;
 
 namespace Game;
 
-public class OverlaysSystem(TurnStateScheduler gameplay, MenuScheduler menu, GameStateResource state) : GameSystem
+public class OverlaysSystem(GameStateResource state) : GameSystem
 {
+    public MenuScheduler? Menu {get; set;}
+    public TurnStateScheduler? Gameplay {get; set;}
+
     public override void Execute()
     {
         switch (state.CurrentState)
         {
             case GameState.GameRun:
-                gameplay.Execute();
+                Gameplay?.Execute();
                 break;
             default:
-                menu.Execute();
+                Menu?.Execute();
                 break;
         }
     }

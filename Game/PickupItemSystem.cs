@@ -3,6 +3,7 @@ using Ecs;
 namespace Game;
 
 public class PickupItemSystem(
+    World world,
     SingletonJoin<Player, Position> playerPosition,
     TableJoin<PickupItem, Position> itemPosition,
     PlayerInventory inventory,
@@ -18,12 +19,19 @@ public class PickupItemSystem(
 
         var (_,player) = pPosition.Value;
 
-        foreach(var (item,itemPosition) in itemPosition)
+        var itemsToRemove = new List<EntityId>(1);
+        foreach(var (item,itemPosition) in itemPosition.Components())
         {
-            if (itemPosition.MapPosition == player.MapPosition)
+            if (itemPosition.Value.MapPosition == player.MapPosition)
             {
-                inventory.Items.Add(item.ItemType);
+                inventory.Items.Add(item.Value.ItemType);
+                itemsToRemove.Add(item.EntityId);
             }
+        }
+
+        foreach(var entityId in itemsToRemove)
+        {
+            world.RemoveEntity(entityId);
         }
 
         if (inventory.Items.Contains(ItemType.Amulet))

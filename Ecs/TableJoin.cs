@@ -1,10 +1,8 @@
 using System.Collections;
-using System.Globalization;
-using System.Runtime.CompilerServices;
 
 namespace Ecs;
 
-public class TableJoin<T, U> : IEnumerable<(T, U)>
+public class TableJoin<T, U> : IEnumerable<(T, U)>, IComponentJoin
 where T : struct
 where U : struct
 
