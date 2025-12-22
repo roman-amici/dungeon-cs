@@ -5,7 +5,7 @@ namespace Game;
 
 public class CenterCameraOnPlayerSystem(
     Camera camera,
-    SingletonJoin<Player, Position> playerPosition) : GameSystem
+    SingletonJoin<Player, MapPosition> playerPosition) : GameSystem
 {
     public override void Execute()
     {
@@ -14,7 +14,7 @@ public class CenterCameraOnPlayerSystem(
         {
             var (_,position) = pPosition.Value;
 
-            camera.SetCenter(position.MapPosition);
+            camera.SetCenter(position.Coord);
         }
     }
 }

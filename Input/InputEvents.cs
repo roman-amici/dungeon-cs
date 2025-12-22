@@ -1,3 +1,5 @@
+using System.Drawing;
+
 namespace Input;
 
 public enum Key
@@ -15,10 +17,11 @@ public struct KeyboardEvent(Key key, bool isDown)
     public bool IsDown {get;} = isDown;
 }
 
-public struct MouseButtonEvent(int button, bool isDown)
+public struct MouseButtonEvent(int button, Point2D position, bool isDown)
 {
     public int Button {get;} = button;
     public bool isDown {get;} = isDown;
+    public Point2D Position {get;} = position;
 }
 
 public struct MouseMoveEvent(int x, int y)

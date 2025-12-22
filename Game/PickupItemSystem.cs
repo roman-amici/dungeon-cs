@@ -4,10 +4,9 @@ namespace Game;
 
 public class PickupItemSystem(
     World world,
-    SingletonJoin<Player, Position> playerPosition,
-    TableJoin<PickupItem, Position> itemPosition,
-    PlayerInventory inventory,
-    GameStateResource gameState) : GameSystem
+    SingletonJoin<Player, MapPosition> playerPosition,
+    TableJoin<PickupItem, MapPosition> itemPosition,
+    Queue<InventoryChangeMessage> inventoryChangeQueue) : GameSystem
 {
     public override void Execute()
     {
@@ -22,9 +21,9 @@ public class PickupItemSystem(
         var itemsToRemove = new List<EntityId>(1);
         foreach(var (item,itemPosition) in itemPosition.Components())
         {
-            if (itemPosition.Value.MapPosition == player.MapPosition)
+            if (itemPosition.Value.Coord == player.Coord)
             {
-                inventory.Items.Add(item.Value.ItemType);
+                inventoryChangeQueue.Enqueue(new(InventoryChangeType.Add, item.Value.ItemType));
                 itemsToRemove.Add(item.EntityId);
             }
         }
@@ -34,9 +33,5 @@ public class PickupItemSystem(
             world.RemoveEntity(entityId);
         }
 
-        if (inventory.Items.Contains(ItemType.Amulet))
-        {
-            gameState.CurrentState = GameState.PlayerWin;
-        }
     }
 }

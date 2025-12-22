@@ -8,9 +8,9 @@ public class ItemSpawner(
     World world,
     DungeonMap<MapTile> map, 
     DistanceMap playerDistance, 
-    SingletonJoin<Player,Position> playerPosition,
+    SingletonJoin<Player,MapPosition> playerPosition,
     Random rng,
-    Table<Position> positions, 
+    Table<MapPosition> positions, 
     Table<PickupItem> items,
     Table<SpriteKey<SpriteTile>> sprites) : SpawningSystem<ItemSpawner.ItemSpawnerContext>(world)
 {
@@ -66,11 +66,11 @@ public class ItemSpawner(
 
         if (playerDistance.IsDirty)
         {
-            playerDistance.UpdateFromMap(position.MapPosition, (coord) => map.Map[coord.X,coord.Y] == MapTile.Floor);
+            playerDistance.UpdateFromMap(position.Coord, (coord) => map.Map[coord.X,coord.Y] == MapTile.Floor);
         }
 
         uint maxDistance = 0;
-        var maxPosition = position.MapPosition;
+        var maxPosition = position.Coord;
         for (var x = 0; x <  playerDistance.Map.GetLength(0); x++)
         {
             for (var y = 0; y < playerDistance.Map.GetLength(1); y++)
@@ -93,7 +93,7 @@ public class ItemSpawner(
         positions.Add(entity, new(maxPosition));
     }
 
-    private SpriteTile GetTile(ItemType itemType)
+    public static SpriteTile GetTile(ItemType itemType)
     {
         return itemType switch
         {

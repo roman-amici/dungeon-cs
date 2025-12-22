@@ -11,7 +11,7 @@ public struct MovingRandomly
 
 public class MoveRandomlySystem(
     Queue<WantsToMoveMessage> moveQueue,
-    TableJoin<MovingRandomly,Position> movers,
+    TableJoin<MovingRandomly,MapPosition> movers,
     Table<ChasingPlayer> chasers,
     DistanceMap distanceMap,
     Random rng) : GameSystem
@@ -21,7 +21,7 @@ public class MoveRandomlySystem(
         var toRemove = new List<EntityId>();
         foreach( var (_,position) in movers.Components())
         {
-            if (StartChasingPlayer(position.EntityId, position.Value.MapPosition))
+            if (StartChasingPlayer(position.EntityId, position.Value.Coord))
             {
                 toRemove.Add(position.EntityId);
                 continue;
@@ -29,10 +29,10 @@ public class MoveRandomlySystem(
             
             MapCoord? coord = rng.Next(0,5) switch
             {
-                0 => position.Value.MapPosition.Up(),
-                1 => position.Value.MapPosition.Left(),
-                2 => position.Value.MapPosition.Down(),
-                3 => position.Value.MapPosition.Right(),
+                0 => position.Value.Coord.Up(),
+                1 => position.Value.Coord.Left(),
+                2 => position.Value.Coord.Down(),
+                3 => position.Value.Coord.Right(),
                 _ => null
             };
 

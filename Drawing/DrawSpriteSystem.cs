@@ -22,13 +22,13 @@ public class DrawSpriteSystem(
     Camera camera,
     TileAtlas<SpriteTile> spriteAtlas,
     Screen screen,
-    TableJoin<SpriteKey<SpriteTile>, Position> sprites) : GameSystem
+    TableJoin<SpriteKey<SpriteTile>, MapPosition> sprites) : GameSystem
 {
     public override void Execute()
     {
         foreach (var (sprite, spritePosition) in sprites)
         {
-            var topLeft = camera.MapCoordToScreenSpaceTopLeft(spritePosition.MapPosition);
+            var topLeft = camera.MapCoordToScreenSpaceTopLeft(spritePosition.Coord);
             if (camera.TileIsVisible(topLeft))
             {
                 spriteAtlas.DrawTile(screen, sprite.Tile, topLeft);

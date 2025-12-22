@@ -8,7 +8,7 @@ public class PlayerSpawner(
     World world,
     DungeonMap<MapTile> map,
     Table<SpriteKey<SpriteTile>> sprites,
-    Table<Position> positions,
+    Table<MapPosition> positions,
     Singleton<Player> player,
     Table<Health> healths,
     Table<ToolTip> toolTip,
@@ -36,9 +36,9 @@ public class PlayerSpawner(
             throw new InvalidOperationException("Player start is not on floor.");
         }
 
-        positions.Add(new(entityId, new Position()
+        positions.Add(new(entityId, new MapPosition()
         {
-            MapPosition = position
+            Coord = position
         }));
 
         healths.Add(entityId, new Health(20));

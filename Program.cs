@@ -49,7 +49,7 @@ var world = new World();
 var rng = new Random();
 world.AddResource(rng);
 
-var map = MapGenerator.GenerateRandomWalkMap(128, 128, rng);
+var map = MapGenerator.GenerateRandomWalkMap(64, 64, rng);
 world.AddResource(map);
 
 var viewPort = new ViewPort(640, 480);
@@ -57,6 +57,9 @@ world.AddResource(viewPort);
 
 var camera = new Camera(viewPort, new MapCoord(map.Center.X,map.Center.Y), 32);
 world.AddResource(camera);
+
+world.AddResource(new UILayout());
+world.AddResource(new Queue<InventoryChangeMessage>());
 
 var sheet = Texture.LoadTexture(renderer, "dungeonfont.png");
 var mapTileAtlas = new TileAtlas<MapTile>(sheet, 32);
@@ -90,7 +93,7 @@ world.AddResource(new Turn()
 world.AddResource(new GameStateResource(GameState.GameRun));
 
 world.AddComponent(new Table<SpriteKey<SpriteTile>>());
-world.AddComponent(new Table<Position>());
+world.AddComponent(new Table<MapPosition>());
 world.AddComponent(new Singleton<Player>());
 world.AddComponent(new Table<Enemy>());
 world.AddComponent(new Table<ToolTip>());
@@ -100,6 +103,8 @@ world.AddComponent(new Table<MovingRandomly>());
 world.AddComponent(new Table<PickupItem>());
 world.AddComponent(new Table<Collision>());
 world.AddComponent(new Table<ChasingPlayer>());
+world.AddComponent(new Table<UITarget>());
+world.AddComponent(new Table<UseItemBehavior>());
 
 var inventory = new PlayerInventory();
 world.AddResource(inventory);
@@ -142,7 +147,11 @@ var drawMap = world.CreateInstance<DrawMapSystem>();
 var drawSprite = world.CreateInstance<DrawSpriteSystem>();
 var drawTooltips = world.CreateInstance<DrawTooltipSystem>();
 var drawHealthBar = world.CreateInstance<DrawHealthBarSystem>();
-var playerPickupItem = world.CreateInstance<PickupItemSystem>(); 
+var playerPickupItem = world.CreateInstance<PickupItemSystem>();
+var inventoryChangeSystem = world.CreateInstance<InventoryChangedSystem>();
+var drawInventory = world.CreateInstance<DrawInventorySystem>();
+var uiLayoutSystem = world.CreateInstance<UILayoutSystem>();
+var checkWin = world.CreateInstance<CheckWinSystem>();
 var debugDraw = world.CreateInstance<DistanceDisplaySystem>();
 
 var endTurn = world.CreateInstance<EndTurnSystem>();
@@ -156,20 +165,26 @@ turnScheduler.AwaitingInput.AddRange([
    drawTooltips,
    drawHealthBar,
    //debugDraw,
+   uiLayoutSystem,
+   drawInventory
 ]);
 
 turnScheduler.PlayerTurn.AddRange([
     playerActions,
     movement,
     playerPickupItem,
+    inventoryChangeSystem,
     combat,
     kill,
+    checkWin,
     endTurn,
     centerCamera,
     drawMap,
     drawSprite,
     drawTooltips,
     drawHealthBar,
+    uiLayoutSystem,
+    drawInventory
 ]);
 
 turnScheduler.EnemyTurn.AddRange([
@@ -182,8 +197,10 @@ turnScheduler.EnemyTurn.AddRange([
     centerCamera,
     drawMap,
     drawSprite,
-   drawTooltips,
-   drawHealthBar,
+    drawTooltips,
+    drawHealthBar,
+    uiLayoutSystem,
+    drawInventory,
 ]);
 
 var menus = world.CreateInstance<MenuScheduler>();

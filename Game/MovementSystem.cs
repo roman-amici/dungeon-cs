@@ -9,8 +9,8 @@ public class MovementSystem(
     Queue<WantsToMoveMessage> moves,
     Queue<WantsToAttackMessage> attacks,
     Singleton<Player> player,
-    Table<Position> positions,
-    TableJoin<Collision,Position> colliders,
+    Table<MapPosition> positions,
+    TableJoin<Collision,MapPosition> colliders,
     DistanceMap distanceToPlayer,
     Table<Health> attacked) : GameSystem
 {
@@ -18,7 +18,7 @@ public class MovementSystem(
     {
         while(moves.TryDequeue(out var move))
         {
-            var tile = map.SafeGet(move.NewPosition.MapPosition);
+            var tile = map.SafeGet(move.NewPosition.Coord);
             if (tile == null)
             {
                 continue;
@@ -29,14 +29,14 @@ public class MovementSystem(
                 continue;
             }
 
-            var occupied = colliders.FindComponentWhere((t) => t.Item2.MapPosition == move.NewPosition.MapPosition);
+            var occupied = colliders.FindComponentWhere((t) => t.Item2.Coord == move.NewPosition.Coord);
             if (occupied == null)
             {
                 positions.Update(move.Entity, move.NewPosition);
 
                 if (player.SingletComponent != null && player.SingletComponent.Value.EntityId == move.Entity)
                 {
-                    distanceToPlayer.UpdateFromMap(move.NewPosition.MapPosition, c => map.Map[c.X,c.Y] == MapTile.Floor);
+                    distanceToPlayer.UpdateFromMap(move.NewPosition.Coord, c => map.Map[c.X,c.Y] == MapTile.Floor);
                 }
             }
             else
@@ -51,8 +51,8 @@ public class MovementSystem(
     }
 }
 
-public struct WantsToMoveMessage(EntityId entity, Position newPosition)
+public struct WantsToMoveMessage(EntityId entity, MapPosition newPosition)
 {
     public EntityId Entity {get;} = entity;
-    public Position NewPosition {get;} = newPosition;
+    public MapPosition NewPosition {get;} = newPosition;
 }

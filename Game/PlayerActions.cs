@@ -11,4 +11,7 @@ public class PlayerMove(MapCoord destination) : PlayerAction
 
 public class PlayerWait : PlayerAction{}
 
-// Use item, etc
+public class UseItemAction(ItemType item) : PlayerAction
+{
+    public ItemType Item {get;} = item;
+}

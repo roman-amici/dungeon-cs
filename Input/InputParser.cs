@@ -51,10 +51,10 @@ public class InputParser
                 MouseMoveEvents.Add(new(e.motion.x,e.motion.y));
                 break;
             case SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN:
-                MouseButtonEvents.Add(new MouseButtonEvent(e.button.button, true));
+                MouseButtonEvents.Add(new MouseButtonEvent(e.button.button, new(e.button.x, e.button.y), true));
                 break;
             case SDL.SDL_EventType.SDL_MOUSEBUTTONUP:
-                MouseButtonEvents.Add(new MouseButtonEvent(e.button.button, false));
+                MouseButtonEvents.Add(new MouseButtonEvent(e.button.button, new(e.button.x, e.button.y), false));
                 break;
         }
     }

@@ -9,7 +9,7 @@ public class DrawTooltipSystem(
     Camera camera,
     TextRenderer textReader,
     MouseLocation mouseLocation,
-    TableJoin<ToolTip, Position> tooltipPositions) : GameSystem
+    TableJoin<ToolTip, MapPosition> tooltipPositions) : GameSystem
 {
     public override void Execute()
     {
@@ -20,12 +20,12 @@ public class DrawTooltipSystem(
 
         foreach (var (tooltip, position) in tooltipPositions)
         {
-            if (camera.TileIsVisible(position.MapPosition))
+            if (camera.TileIsVisible(position.Coord))
             {
                 var mouseCoord = camera.ScreenSpaceToMapCoord(mouseLocation.Point.Value);
-                if (position.MapPosition == mouseCoord)
+                if (position.Coord == mouseCoord)
                 {
-                    var start = camera.MapCoordToScreenSpaceTopLeft(position.MapPosition);
+                    var start = camera.MapCoordToScreenSpaceTopLeft(position.Coord);
                     start.X += camera.TileSize / 2;
                     start.Y += camera.TileSize / 2;
 

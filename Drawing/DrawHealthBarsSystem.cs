@@ -4,18 +4,18 @@ using Game;
 
 namespace Drawing;
 
-public class DrawHealthBarSystem(Camera camera, Screen screen, TableJoin<Health, Position> query) : GameSystem
+public class DrawHealthBarSystem(Camera camera, Screen screen, TableJoin<Health, MapPosition> query) : GameSystem
 {
     public override void Execute()
     {
         foreach (var (health, position) in query)
         {
-            if (!camera.TileIsVisible(position.MapPosition))
+            if (!camera.TileIsVisible(position.Coord))
             {
                 continue;
             }
 
-            var screenCoord = camera.MapCoordToScreenSpaceTopLeft(position.MapPosition);
+            var screenCoord = camera.MapCoordToScreenSpaceTopLeft(position.Coord);
 
             var healthBarPosition = new Rect2D()
             {

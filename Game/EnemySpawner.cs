@@ -7,7 +7,7 @@ namespace Game;
 public class EnemySpawner(
     World world,
     DungeonMap<MapTile> map,
-    Table<Position> positions,
+    Table<MapPosition> positions,
     Table<SpriteKey<SpriteTile>> sprites,
     Table<Enemy> enemies,
     Table<ToolTip> tooltips,

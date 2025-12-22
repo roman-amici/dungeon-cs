@@ -5,7 +5,7 @@ namespace Game;
 
 public class ChasingPlayerSystem(
     DistanceMap playerDistance,
-    TableJoin<ChasingPlayer, Position> chasers,
+    TableJoin<ChasingPlayer, MapPosition> chasers,
     Table<MovingRandomly> randomMovers,
     Queue<WantsToMoveMessage> wantsToMove
 ) : GameSystem
@@ -15,13 +15,13 @@ public class ChasingPlayerSystem(
         var toRemove = new List<EntityId>(0);
         foreach(var (_,position) in chasers.Components())
         {
-            if (StartMovingRandomly(position.EntityId, position.Value.MapPosition))
+            if (StartMovingRandomly(position.EntityId, position.Value.Coord))
             {
                 toRemove.Add(position.EntityId);
                 continue;
             }
 
-            var nextCoord = playerDistance.NextNearest(position.Value.MapPosition);
+            var nextCoord = playerDistance.NextNearest(position.Value.Coord);
             if (nextCoord != null)
             {
                 wantsToMove.Enqueue(new(position.EntityId, new(nextCoord.Value)));
