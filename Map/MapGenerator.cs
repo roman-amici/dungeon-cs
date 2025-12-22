@@ -1,4 +1,6 @@
 using System.Drawing;
+using System.Runtime.InteropServices;
+using Drawing;
 
 namespace Map;
 
@@ -213,5 +215,73 @@ public static class MapGenerator
         PlaceEnemiesAwayFromPlayer(map, random);
 
         return map;
+    }
+
+    public const int MaxIterations = 1000;
+    public static void RandomWalk(DungeonMap<MapTile> map, MapCoord start, Random random)
+    {
+        var position = start;
+        for(var i = 0; i < MaxIterations; i++)
+        {
+            map.Map[position.X,position.Y] = MapTile.Floor;
+
+            position = random.Next(0,5) switch
+            {
+                0 => position.Up(),
+                1 => position.Down(),
+                2 => position.Left(),
+                _ => position.Right()
+            };
+
+            if (position.X >= map.Map.GetLength(0) || 
+                position.Y >= map.Map.GetLength(1) ||
+                position.X <= 0 ||
+                position.Y <= 0)
+            {
+                return;
+            }
+        }
+    }
+
+    public static int CountTiles(DungeonMap<MapTile> map, MapTile tile)
+    {
+        var count = 0;
+        for(var x = 0; x < map.Map.GetLength(0); x++)
+        {
+            for (var y = 0; y < map.Map.GetLength(1); y++)
+            {
+                if (map.Map[x,y] == tile)
+                {
+                    count++;
+                }
+            }
+        }
+
+        return count;
+    }
+
+    public const double percentFloor = 0.45;
+    public static DungeonMap<MapTile> GenerateRandomWalkMap(uint width, uint height, Random random)
+    {
+        var map = new DungeonMap<MapTile>(width, height);
+
+        var start = map.Center;
+
+        var total = (double)(width * height);
+
+        while (CountTiles(map, MapTile.Floor) / total < percentFloor)
+        {
+            RandomWalk(map, start, random);
+
+            var startX = random.Next(1, map.Map.GetLength(0) - 1);
+            var startY = random.Next(1, map.Map.GetLength(1) - 1);
+            start = new(startX,startY);
+        }
+
+        PlacePlayerNearCenter(map);
+        PlaceEnemiesAwayFromPlayer(map,random);
+
+        return map;
+        
     }
 }

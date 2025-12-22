@@ -49,7 +49,7 @@ var world = new World();
 var rng = new Random();
 world.AddResource(rng);
 
-var map = MapGenerator.GenerateCellularAutomataMap(128, 128, rng);
+var map = MapGenerator.GenerateRandomWalkMap(128, 128, rng);
 world.AddResource(map);
 
 var viewPort = new ViewPort(640, 480);

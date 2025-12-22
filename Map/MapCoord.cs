@@ -2,10 +2,22 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Map;
 
-public struct MapCoord(int x, int y)
+public struct MapCoord
 {
-    public int X { get; } = x;
-    public int Y { get; } = y;
+    public MapCoord(int x, int y)
+    {
+        X = x;
+        Y = y;
+    }
+
+    public MapCoord(MapCoord coord)
+    {
+        X = coord.X;
+        Y = coord.Y;
+    }
+
+    public int X { get; }
+    public int Y { get; }
 
     public uint DistanceX(MapCoord other)
     {
