@@ -18,7 +18,7 @@ public class ItemSpawner(
     {
         SpawnEntity(new ItemSpawnerContext(new(), ItemType.Amulet));
 
-        foreach(var room in map.Rooms)
+        foreach(var position in map.EnemySpawns)
         {
             var i = rng.Next(0,12);
 
@@ -29,11 +29,11 @@ public class ItemSpawner(
 
             if (i == 10)
             {
-                SpawnEntity(new ItemSpawnerContext(room.Center, ItemType.SwordUpgrade));
+                SpawnEntity(new ItemSpawnerContext(position, ItemType.SwordUpgrade));
             }
             else
             {
-                SpawnEntity(new ItemSpawnerContext(room.Center, ItemType.Potion));
+                SpawnEntity(new ItemSpawnerContext(position, ItemType.Potion));
             }
         }
     }
@@ -84,7 +84,7 @@ public class ItemSpawner(
                 if ( distance.Value > maxDistance)
                 {
                     maxDistance = distance.Value;
-                    maxPosition = new MapCoord((uint)x,(uint)y);
+                    maxPosition = new MapCoord(x,y);
                 }
             }
         }

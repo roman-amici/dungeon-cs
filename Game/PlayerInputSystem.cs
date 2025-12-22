@@ -48,10 +48,10 @@ public class PlayerInputSystem(
                     newPosition = position.MapPosition.Down();
                     break;
                 case Key.Up:
-                    newPosition = position.MapPosition.SafeUp();
+                    newPosition = position.MapPosition.Up();
                     break;
                 case Key.Left:
-                    newPosition = position.MapPosition.SafeLeft();
+                    newPosition = position.MapPosition.Left();
                     break;
                 case Key.Right:
                     newPosition = position.MapPosition.Right();

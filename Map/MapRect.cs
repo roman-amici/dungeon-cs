@@ -1,19 +1,19 @@
 namespace Map;
 
-public struct MapRect(uint x, uint y, uint width, uint height)
+public struct MapRect(int x, int y, uint width, uint height)
 {
-    public uint X { get; } = x;
-    public uint Y { get; } = y;
+    public int X { get; } = x;
+    public int Y { get; } = y;
 
-    public (uint Start, uint End) IntervalX => (X, X + Width - 1);
-    public (uint Start, uint End) IntervalY => (Y, Y + Height - 1);
+    public (int Start, int End) IntervalX => (X, X + (int)Width - 1);
+    public (int Start, int End) IntervalY => (Y, Y + (int)Height - 1);
 
-    public MapCoord Center => new MapCoord(X + Width / 2, Y + Height / 2);
+    public MapCoord Center => new MapCoord(X + (int)Width / 2, Y + (int)Height / 2);
 
     public uint Width { get; } = width;
     public uint Height { get; } = height;
 
-    public bool IntervalOverlaps((uint a1, uint a2) ta, (uint b1, uint b2) tb)
+    public bool IntervalOverlaps((int a1, int a2) ta, (int b1, int b2) tb)
     {
         var aMax = Math.Max(ta.a1, ta.a2);
         var aMin = Math.Min(ta.a1, ta.a2);

@@ -19,13 +19,11 @@ public class EnemySpawner(
 {
     public override void Execute()
     {
-        foreach(var room in map.Rooms)
+        foreach(var coord in map.EnemySpawns)
         {
-            var position = room.Center;
-
             SpawnEntity(new EnemySpawnerContext
             {
-                 SpawnPosition = position
+                 SpawnPosition = coord
             });
         }
     }

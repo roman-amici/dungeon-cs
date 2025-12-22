@@ -16,12 +16,8 @@ public class DrawMapSystem(
         for (var x = camera.LeftX; x <= camera.RightX; x++)
         {
             for (var y = camera.TopY; y <= camera.BottomY; y++)
-            {
-                if (x < 0 || y < 0)
-                {
-                    continue;
-                }
-                var coord = new MapCoord((uint)Math.Floor(x), (uint)Math.Floor(y));
+            {    
+                var coord = new MapCoord(x, y);
                 var tile = map.SafeGet(coord) ?? default;
                 var screenSpace = camera.MapCoordToScreenSpaceTopLeft(coord);
                 

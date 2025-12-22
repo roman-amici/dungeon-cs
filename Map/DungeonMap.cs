@@ -1,8 +1,15 @@
+using System.Globalization;
+
 namespace Map;
 
-public class DungeonMap<T>(uint width, uint height) : Map2D<T>(width, height)
+public class DungeonMap<T> : Map2D<T>
 where T : struct
 {
-    public List<MapRect> Rooms {get;} = new();
+    public DungeonMap(uint width, uint height) : base(width,height){}
+
+    public DungeonMap(T[,] map) : base(map){}
+
+    public MapCoord PlayerStart {get; set;}
+    public List<MapCoord> EnemySpawns {get;} = [];
 
 }

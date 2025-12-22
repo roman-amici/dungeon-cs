@@ -13,7 +13,7 @@ if (SDL.SDL_Init(SDL.SDL_INIT_VIDEO) < 0)
 }
 
 var window = SDL.SDL_CreateWindow(
-    "Tutorial",
+    "Rogue Game",
     SDL.SDL_WINDOWPOS_UNDEFINED,
     SDL.SDL_WINDOWPOS_UNDEFINED,
     640,
@@ -45,17 +45,17 @@ if (SDL_ttf.TTF_Init() < 0)
 }
 
 var world = new World();
-var mapGenerator = new MapGenerator(256, 256);
+
 var rng = new Random();
 world.AddResource(rng);
 
-var map = mapGenerator.Generate(rng);
+var map = MapGenerator.GenerateCellularAutomataMap(128, 128, rng);
 world.AddResource(map);
 
 var viewPort = new ViewPort(640, 480);
 world.AddResource(viewPort);
 
-var camera = new Camera(viewPort, new Point2D(map.Center.X,map.Center.Y), 32);
+var camera = new Camera(viewPort, new MapCoord(map.Center.X,map.Center.Y), 32);
 world.AddResource(camera);
 
 var sheet = Texture.LoadTexture(renderer, "dungeonfont.png");
@@ -89,26 +89,17 @@ world.AddResource(new Turn()
 });
 world.AddResource(new GameStateResource(GameState.GameRun));
 
-var sprites = new Table<SpriteKey<SpriteTile>>();
-var positions = new Table<Position>();
-var player = new Singleton<Player>();
-var enemies = new Table<Enemy>();
-var toolTips = new Table<ToolTip>();
-var healths = new Table<Health>();
-var damages = new Table<Damage>();
-var randomMovers = new Table<MovingRandomly>();
-var pickupItems = new Table<PickupItem>();
-var colliders = new Table<Collision>();
-world.AddComponent(sprites);
-world.AddComponent(positions);
-world.AddComponent(player);
-world.AddComponent(enemies);
-world.AddComponent(toolTips);
-world.AddComponent(healths);
-world.AddComponent(damages);
-world.AddComponent(randomMovers);
-world.AddComponent(pickupItems);
-world.AddComponent(colliders);
+world.AddComponent(new Table<SpriteKey<SpriteTile>>());
+world.AddComponent(new Table<Position>());
+world.AddComponent(new Singleton<Player>());
+world.AddComponent(new Table<Enemy>());
+world.AddComponent(new Table<ToolTip>());
+world.AddComponent(new Table<Health>());
+world.AddComponent(new Table<Damage>());
+world.AddComponent(new Table<MovingRandomly>());
+world.AddComponent(new Table<PickupItem>());
+world.AddComponent(new Table<Collision>());
+world.AddComponent(new Table<ChasingPlayer>());
 
 var inventory = new PlayerInventory();
 world.AddResource(inventory);
@@ -141,6 +132,7 @@ world.AddResource(playerActionQueue);
 
 var playerActions = world.CreateInstance<PlayerActionSystem>();
 var moveRandomly = world.CreateInstance<MoveRandomlySystem>();
+var chasePlayer = world.CreateInstance<ChasingPlayerSystem>();
 var playerInput = world.CreateInstance<PlayerInputSystem>();
 var movement  = world.CreateInstance<MovementSystem>(); 
 var combat = world.CreateInstance<CombatSystem>();
@@ -182,6 +174,7 @@ turnScheduler.PlayerTurn.AddRange([
 
 turnScheduler.EnemyTurn.AddRange([
     moveRandomly,
+    chasePlayer,
     movement,
     combat,
     kill,

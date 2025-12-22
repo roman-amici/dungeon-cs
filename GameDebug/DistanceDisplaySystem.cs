@@ -13,7 +13,7 @@ public class DistanceDisplaySystem(Camera camera, TextRenderer textRenderer, Dis
         {
             for (var y = 0; y < distances.Map.GetLength(1); y++)
             {
-                if (!camera.TileIsVisible(new MapCoord((uint)x,(uint)y)))
+                if (!camera.TileIsVisible(new MapCoord(x,y)))
                 {
                     continue;
                 }
@@ -27,7 +27,7 @@ public class DistanceDisplaySystem(Camera camera, TextRenderer textRenderer, Dis
                         Color = Color.GreenYellow
                     };
 
-                    textRenderer.DrawTextCentered(text, camera.MapCoordToScreenSpaceTopLeft(new((uint)x,(uint)y)));
+                    textRenderer.DrawTextCentered(text, camera.MapCoordToScreenSpaceTopLeft(new(x,y)));
                 }
                 else
                 {
@@ -36,7 +36,7 @@ public class DistanceDisplaySystem(Camera camera, TextRenderer textRenderer, Dis
                         Color = Color.GreenYellow,
                         FontSize = 14,
                         Text = "None"
-                    }, camera.MapCoordToScreenSpaceTopLeft(new((uint)x,(uint)y)));
+                    }, camera.MapCoordToScreenSpaceTopLeft(new(x,y)));
                 }
             }
         }

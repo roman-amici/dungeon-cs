@@ -29,27 +29,16 @@ public class PlayerSpawner(
 
         sprites.Add(new Component<SpriteKey<SpriteTile>>(entityId, tile));
 
-        MapCoord? position = null;
-        for (var i = 0; i < map.Map.GetLength(0); i++)
-        {
-            for (var j = 0; j < map.Map.GetLength(1); j++)
-            {
-                if (map.Map[i, j] == MapTile.Floor)
-                {
-                    position = new MapCoord((uint)i, (uint)j);
-                    break;
-                }
-            }
-        }
+        var position = map.PlayerStart;
 
-        if (position == null)
+        if (map.Map[position.X,position.Y] != MapTile.Floor)
         {
-            throw new InvalidOperationException("Map has no floor");
+            throw new InvalidOperationException("Player start is not on floor.");
         }
 
         positions.Add(new(entityId, new Position()
         {
-            MapPosition = position.Value
+            MapPosition = position
         }));
 
         healths.Add(entityId, new Health(20));

@@ -2,10 +2,10 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Map;
 
-public struct MapCoord(uint x, uint y)
+public struct MapCoord(int x, int y)
 {
-    public uint X { get; } = x;
-    public uint Y { get; } = y;
+    public int X { get; } = x;
+    public int Y { get; } = y;
 
     public uint DistanceX(MapCoord other)
     {
@@ -27,12 +27,8 @@ public struct MapCoord(uint x, uint y)
         return Math.Sqrt(Math.Pow(X - other.X, 2) + Math.Pow(Y - other.Y, 2));
     }
 
-    public MapCoord? SafeUp()
+    public MapCoord Up()
     {
-        if (Y == 0)
-        {
-            return null;
-        }
         return new(X,Y-1);
     }
 
@@ -41,18 +37,19 @@ public struct MapCoord(uint x, uint y)
         return new(X,Y+1);
     }
 
-    public MapCoord? SafeLeft()
+    public MapCoord Left()
     {
-        if (X == 0)
-        {
-            return null;
-        }
         return new(X-1,Y);
     }
 
     public MapCoord Right()
     {
         return new(X+1,Y);
+    }
+
+    public Point2D ToPoint()
+    {
+        return new Point2D(X,Y);
     }
 
     public static bool operator ==(MapCoord left, MapCoord right)

@@ -8,12 +8,17 @@ public abstract class Map2D<T> where T : struct
         Map = new T[width, height];
     }
 
+    public Map2D(T[,] map)
+    {
+        Map = map;
+    }
+
     public uint Width => (uint)Map.GetLength(0);
     public uint Height => (uint)Map.GetLength(1);
     public T[,] Map { get; }
-    public MapCoord Center => new MapCoord(Width / 2, Height / 2);
+    public MapCoord Center => new MapCoord((int)Width / 2, (int)Height / 2);
 
-    public T? SafeGet(uint x, uint y)
+    public T? SafeGet(int x, int y)
     {
         if (x >= Map.GetLength(0) || x < 0)
         {
@@ -33,27 +38,37 @@ public abstract class Map2D<T> where T : struct
         return SafeGet(coord.X,coord.Y);
     }
 
-    public T? Up(uint x, uint y)
+    public T? Up(int x, int y)
     {
         return SafeGet(x, y + 1);
     }
 
-    public T? Down(uint x, uint y)
+    public T? Down(int x, int y)
     {
+        if (y == 0)
+        {
+            return null;
+        }
+
         return SafeGet(x, y - 1);
     }
 
-    public T? Right(uint x, uint y)
+    public T? Right(int x, int y)
     {
         return SafeGet(x + 1, y);
     }
 
-    public T? Left(uint x, uint y)
+    public T? Left(int x, int y)
     {
+        if (x == 0)
+        {
+            return null;
+        }
+
         return SafeGet(x - 1, y);
     }
 
-    public IList<T> SafeCardinals(uint x, uint y)
+    public IList<T> SafeCardinals(int x, int y)
     {
         var l = new List<T>(4);
 
@@ -84,7 +99,6 @@ public abstract class Map2D<T> where T : struct
 
         return l;
     }
-
     public IList<MapCoord> SafeCardinalCoords(MapCoord coord)
     {
         var coords = new List<MapCoord>();

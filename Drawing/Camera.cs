@@ -10,21 +10,21 @@ public class ViewPort(uint widthPixels, uint heightPixels)
     public Point2D Center {get;} = new(widthPixels / 2, heightPixels / 2);
 }
 
-public class Camera(ViewPort viewPort, Point2D topLeft, uint tileSize)
+public class Camera(ViewPort viewPort, MapCoord topLeft, uint tileSize)
 {
     public ViewPort ViewPort { get; } = viewPort;
 
     public uint TileSize { get; } = tileSize;
 
-    public double LeftX => TopLeft.X;
-    public double RightX => TopLeft.X + ViewPort.WidthPixels / TileSize;
-    public double TopY => TopLeft.Y;
-    public double BottomY => TopLeft.Y + ViewPort.HeightPixels / TileSize;
+    public int LeftX => TopLeft.X;
+    public int RightX => TopLeft.X + (int)(ViewPort.WidthPixels / TileSize);
+    public int TopY => TopLeft.Y;
+    public int BottomY => TopLeft.Y + (int)(ViewPort.HeightPixels / TileSize);
 
-    public Point2D TopLeft { get; set; } = topLeft;
-    public Point2D TopRight => new Point2D(RightX, TopLeft.Y);
-    public Point2D BottomLeft => new Point2D(TopLeft.X, TopLeft.Y);
-    public Point2D BottomRight => new Point2D(TopRight.X, BottomY);
+    public MapCoord TopLeft { get; set; } = topLeft;
+    public MapCoord TopRight => new MapCoord(RightX, TopLeft.Y);
+    public MapCoord BottomLeft => new MapCoord(TopLeft.X, TopLeft.Y);
+    public MapCoord BottomRight => new MapCoord(TopRight.X, BottomY);
 
     public Point2D MapCoordToScreenSpaceTopLeft(MapCoord coord)
     {
@@ -48,22 +48,22 @@ public class Camera(ViewPort viewPort, Point2D topLeft, uint tileSize)
 
     public void SetCenter(MapCoord center)
     {
-        var x = center.X - (ViewPort.WidthPixels / TileSize / 2);
-        var y = center.Y - (ViewPort.HeightPixels / TileSize / 2);
+        var x = center.X - (int)(ViewPort.WidthPixels / TileSize / 2);
+        var y = center.Y - (int)(ViewPort.HeightPixels / TileSize / 2);
 
         TopLeft = new (x,y);
     }
 
     internal MapCoord? ScreenSpaceToMapCoord(Point2D screenSpace)
     {
-        var xMap = Math.Floor(TopLeft.X + screenSpace.X / TileSize);
-        var yMap = Math.Floor(TopLeft.Y + screenSpace.Y / TileSize);
+        var xMap = (int)Math.Floor(TopLeft.X + screenSpace.X / TileSize);
+        var yMap = (int)Math.Floor(TopLeft.Y + screenSpace.Y / TileSize);
 
         if (xMap < 0 || yMap < 0)
         {
             return null;
         }
 
-        return new MapCoord((uint)xMap,(uint)yMap);
+        return new MapCoord(xMap,yMap);
     }
 }
