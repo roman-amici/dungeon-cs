@@ -17,8 +17,13 @@ public class DrawMapSystem(
         {
             for (var y = camera.TopY; y <= camera.BottomY; y++)
             {
-                var tile = map.SafeGet(x, y) ?? default;
-                var screenSpace = camera.MapCoordToScreenSpaceTopLeft(new MapCoord(x, y));
+                if (x < 0 || y < 0)
+                {
+                    continue;
+                }
+                var coord = new MapCoord((uint)Math.Floor(x), (uint)Math.Floor(y));
+                var tile = map.SafeGet(coord) ?? default;
+                var screenSpace = camera.MapCoordToScreenSpaceTopLeft(coord);
                 
                 atlas.DrawTile(screen, tile, screenSpace);
             }

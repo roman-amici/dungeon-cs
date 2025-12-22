@@ -10,21 +10,21 @@ public class ViewPort(uint widthPixels, uint heightPixels)
     public Point2D Center {get;} = new(widthPixels / 2, heightPixels / 2);
 }
 
-public class Camera(ViewPort viewPort, MapCoord topLeft, uint tileSize)
+public class Camera(ViewPort viewPort, Point2D topLeft, uint tileSize)
 {
     public ViewPort ViewPort { get; } = viewPort;
 
     public uint TileSize { get; } = tileSize;
 
-    public uint LeftX => TopLeft.X;
-    public uint RightX => TopLeft.X + ViewPort.WidthPixels / TileSize;
-    public uint TopY => TopLeft.Y;
-    public uint BottomY => TopLeft.Y + ViewPort.HeightPixels / TileSize;
+    public double LeftX => TopLeft.X;
+    public double RightX => TopLeft.X + ViewPort.WidthPixels / TileSize;
+    public double TopY => TopLeft.Y;
+    public double BottomY => TopLeft.Y + ViewPort.HeightPixels / TileSize;
 
-    public MapCoord TopLeft { get; set; } = topLeft;
-    public MapCoord TopRight => new MapCoord(RightX, TopLeft.Y);
-    public MapCoord BottomLeft => new MapCoord(TopLeft.X, TopLeft.Y);
-    public MapCoord BottomRight => new MapCoord(TopRight.X, BottomY);
+    public Point2D TopLeft { get; set; } = topLeft;
+    public Point2D TopRight => new Point2D(RightX, TopLeft.Y);
+    public Point2D BottomLeft => new Point2D(TopLeft.X, TopLeft.Y);
+    public Point2D BottomRight => new Point2D(TopRight.X, BottomY);
 
     public Point2D MapCoordToScreenSpaceTopLeft(MapCoord coord)
     {
@@ -54,11 +54,16 @@ public class Camera(ViewPort viewPort, MapCoord topLeft, uint tileSize)
         TopLeft = new (x,y);
     }
 
-    internal MapCoord ScreenSpaceToMapCoord(Point2D screenSpace)
+    internal MapCoord? ScreenSpaceToMapCoord(Point2D screenSpace)
     {
-        var xMap = TopLeft.X + (uint)Math.Floor(screenSpace.X / TileSize);
-        var yMap = TopLeft.Y + (uint)Math.Floor(screenSpace.Y / TileSize);
+        var xMap = Math.Floor(TopLeft.X + screenSpace.X / TileSize);
+        var yMap = Math.Floor(TopLeft.Y + screenSpace.Y / TileSize);
 
-        return new MapCoord(xMap,yMap);
+        if (xMap < 0 || yMap < 0)
+        {
+            return null;
+        }
+
+        return new MapCoord((uint)xMap,(uint)yMap);
     }
 }

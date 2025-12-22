@@ -55,7 +55,7 @@ world.AddResource(map);
 var viewPort = new ViewPort(640, 480);
 world.AddResource(viewPort);
 
-var camera = new Camera(viewPort, map.Center, 32);
+var camera = new Camera(viewPort, new Point2D(map.Center.X,map.Center.Y), 32);
 world.AddResource(camera);
 
 var sheet = Texture.LoadTexture(renderer, "dungeonfont.png");
