@@ -103,8 +103,6 @@ world.AddComponent(new Table<MovingRandomly>());
 world.AddComponent(new Table<PickupItem>());
 world.AddComponent(new Table<Collision>());
 world.AddComponent(new Table<ChasingPlayer>());
-world.AddComponent(new Table<UITarget>());
-world.AddComponent(new Table<UseItemBehavior>());
 
 var inventory = new PlayerInventory();
 world.AddResource(inventory);

@@ -6,7 +6,7 @@ public class PlayerInventory
 {
     public List<ItemEntry> Items {get;} = new();
 
-    public bool TryIncrementCount(ItemType itemType)
+    public void IncrementCount(ItemType itemType)
     {
         for (var i = 0; i < Items.Count; i++)
         {
@@ -16,16 +16,16 @@ public class PlayerInventory
                 item.Count += 1;
                 Items[i] = item;
 
-                return true;
+                return;
             }
         }
 
-        return false;
+        Items.Add(new(itemType, 1));
     }
 
-    public bool TryDecrementCount(ItemType itemType)
+    public void DecrementCount(ItemType itemType)
     {
-                for (var i = 0; i < Items.Count; i++)
+        for (var i = 0; i < Items.Count; i++)
         {
             if (Items[i].ItemType == itemType)
             {
@@ -33,17 +33,14 @@ public class PlayerInventory
                 item.Count -= 1;
                 Items[i] = item;
 
-                return true;
+                return;
             }
         }
-
-        return false;
     }
 }
 
-public struct ItemEntry(EntityId entity, ItemType itemType, int count)
+public struct ItemEntry(ItemType itemType, int count)
 {
-    public EntityId Entity {get;} = entity;
     public ItemType ItemType {get;} = itemType;
     public int Count {get; set;} = count;
 }

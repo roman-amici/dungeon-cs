@@ -52,7 +52,7 @@ public class PlayerActionSystem(
             case ItemType.Potion:
                 var newHealth = health.Value;
                 newHealth.AddHealth(health.Value.MaxHealth);
-                playerHealth.T.Update(health.EntityId, health.Value);
+                playerHealth.T.Update(health.EntityId, newHealth);
                 inventoryChange.Enqueue(new(InventoryChangeType.Remove, ItemType.Potion));
                 break;
         }

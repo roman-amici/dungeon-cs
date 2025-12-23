@@ -24,6 +24,7 @@ public class ItemSpawner(
 
             if (i < 10)
             {
+                SpawnEntity(new ItemSpawnerContext(position, ItemType.Potion));
                 continue;
             }
 

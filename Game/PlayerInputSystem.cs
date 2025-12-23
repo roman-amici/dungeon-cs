@@ -9,7 +9,7 @@ public class PlayerInputSystem(
     SingletonJoin<Player,MapPosition> playerPosition,
     MouseLocation mouseLocation,
     Queue<PlayerAction> playerActions,
-    TableJoin<UITarget,UseItemBehavior> useItemTargets,
+    UILayout layout,
     Turn turn
 ) : GameSystem
 {
@@ -35,11 +35,16 @@ public class PlayerInputSystem(
                 continue;
             }
 
-            foreach(var (target,action) in useItemTargets)
+            foreach(var uiObject in layout.UIObjects)
             {
-                if (target.Location.Contains(mouseClickEvent.Position))
+                if (uiObject.Target == null || uiObject.Action == null)
                 {
-                    playerActions.Enqueue(new UseItemAction(action.ItemType));
+                    continue;
+                }
+
+                if (uiObject.Target.Value.Location.Contains(mouseClickEvent.Position))
+                {
+                    playerActions.Enqueue(uiObject.Action);
                 }
             }
         }
@@ -53,8 +58,6 @@ public class PlayerInputSystem(
         {
             return;
         }
-
-
     }
 
     private void HandleKeyboardActions()
